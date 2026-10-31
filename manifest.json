@@ -1,0 +1,20 @@
+{
+  "name": "Magnets & Magnetism – Discover the Invisible Force",
+  "short_name": "Magnets",
+  "description": "An interactive 3D virtual magnetism lab for Classes 5–6. Move magnets, reveal fields, test materials and build an electromagnet. Developed by Mateen Yousuf, Teacher.",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050d1f",
+  "theme_color": "#050d1f",
+  "lang": "en",
+  "categories": ["education", "science"],
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

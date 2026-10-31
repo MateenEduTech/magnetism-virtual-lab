@@ -1,0 +1,1569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Magnets &amp; Magnetism – Discover the Invisible Force</title>
+<meta name="description" content="Interactive 3D virtual magnetism lab for Classes 5–6. Developed by Mateen Yousuf, Teacher.">
+<meta name="theme-color" content="#050d1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Magnets">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{
+  --navy:#050d1f; --navy2:#0b2a52; --panel:rgba(5,16,38,.94); --line:rgba(120,200,255,.28);
+  --sky:#5cc8ff; --teal:#19c3d6; --sun:#35d4ff; --leaf:#46e08f; --ink:#ffffff; --muted:#a9c8e6; --warn:#ff8a7a; --red:#ff4d5e; --blue:#3b82ff;
+  --r:16px; --safe-b:env(safe-area-inset-bottom,0px);
+  --font:"Avenir Next","Segoe UI","Trebuchet MS",Roboto,system-ui,-apple-system,sans-serif;
+  --navh:64px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#050d1f;color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.45}
+body.no3d{background:radial-gradient(circle at 50% 40%,#0b3a66,#050d1f 70%)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+#labels{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;transform:translate(-50%,-120%);pointer-events:auto;white-space:nowrap;background:rgba(5,16,38,.85);color:#fff;border:1px solid rgba(120,200,255,.5);
+  border-radius:99px;padding:3px 11px;font-size:13px;font-weight:700;letter-spacing:.2px;cursor:pointer;will-change:transform;display:none}
+.lbl.you{background:var(--sun);color:#04203a;border-color:#fff;font-size:14px;z-index:3}
+.lbl.hs{background:#fff;color:#04203a;border:2px solid var(--sun);width:30px;height:30px;padding:0;border-radius:50%;text-align:center;line-height:26px;font-size:15px;transform:translate(-50%,-50%)}
+.lbl.hs::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--sun);animation:ping 1.8s infinite}
+@keyframes ping{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+.glass{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+
+/* ---------- loader ---------- */
+#loader{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 40%,#0b3a66,#050d1f 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .6s}
+#loader .drop{font-size:64px;animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-12px)}}
+#loader.hide{opacity:0;pointer-events:none}
+
+/* ---------- title ---------- */
+#title{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:clamp(12px,4.5vh,48px) 18px calc(24px + var(--safe-b));
+  background:radial-gradient(ellipse at 50% 42%,rgba(2,8,22,.55) 0%,rgba(2,8,22,.3) 45%,rgba(2,8,22,.0) 75%),linear-gradient(rgba(2,8,22,.45),rgba(2,8,22,0) 30%,rgba(2,8,22,0) 62%,rgba(2,8,22,.7));
+  transition:opacity .9s,transform .9s}
+#title.gone{opacity:0;pointer-events:none;transform:scale(1.06)}
+#title h1{margin:0;font-size:clamp(34px,7.2vw,96px);line-height:.98;font-weight:900;letter-spacing:2px;text-transform:uppercase;
+  background:linear-gradient(#ffffff 25%,#8fe9ff 70%,#35a6ff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 rgba(0,40,110,.65)) drop-shadow(0 0 28px rgba(40,190,255,.55))}
+#title h2{margin:.5em 0 0;font-size:clamp(20px,3.6vw,40px);font-weight:700;color:#8fe9ff;text-shadow:0 2px 10px rgba(0,10,30,.9)}
+#title p.sup{max-width:720px;margin:.9em auto 0;font-size:clamp(16px,2.2vw,22px);color:#fff;text-shadow:0 2px 8px rgba(0,20,50,.95)}
+#title .cred{margin-top:1.1em;font-size:clamp(17px,2.4vw,24px);font-weight:800;letter-spacing:.6px;color:#fff;background:rgba(5,16,38,.7);border:1px solid rgba(120,200,255,.5);padding:8px 22px;border-radius:99px}
+#title .cred small{display:block;font-weight:600;font-size:.72em;color:#8fe9ff;letter-spacing:2px;text-transform:uppercase}
+.start{margin-top:1.3em;font-size:clamp(18px,2.4vw,26px);font-weight:900;letter-spacing:1.4px;padding:16px 38px;border-radius:99px;border:3px solid #fff;
+  background:linear-gradient(#7cecff,#22a8f0);color:#04203a;box-shadow:0 8px 0 #0a6aa8,0 0 34px rgba(40,200,255,.5);animation:pulse 2.2s ease-in-out infinite}
+.start:active{transform:translateY(4px);box-shadow:0 4px 0 #0a6aa8}
+@keyframes pulse{50%{transform:scale(1.045)}}
+#title .tag{margin-top:1.2em;font-size:15px;color:#d6efff;font-style:italic;text-shadow:0 2px 8px rgba(0,20,50,.95)}
+
+/* ---------- top bar ---------- */
+#top{position:fixed;left:0;right:0;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px;pointer-events:none}
+#top>*{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:99px;font-weight:900;letter-spacing:.4px;font-size:16px}
+.brand span.i{font-size:22px}
+.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.tb{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;font-size:19px;padding:0}
+.tb:hover{background:var(--navy2)} .tb.on{background:var(--sun);color:#04203a}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:0 12px;height:36px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:13px;font-weight:700}
+.chip i{width:9px;height:9px;border-radius:50%;background:#5fd08a;display:inline-block}
+.chip.off i{background:var(--warn)}
+#installBtn{display:none;height:44px;padding:0 16px;border-radius:99px;border:2px solid #fff;background:var(--sun);color:#04203a;font-weight:900}
+#backBtn{display:none;height:44px;padding:0 16px;border-radius:99px;border:2px solid #fff;background:var(--sun);color:#04203a;font-weight:900;margin-left:8px}
+#settings{position:fixed;right:10px;top:calc(62px + env(safe-area-inset-top,0px));z-index:25;width:min(300px,92vw);padding:14px;display:none}
+#settings.open{display:block}
+#settings label{display:block;font-weight:700;margin:10px 0 4px;font-size:15px}
+#settings input[type=range]{width:100%}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:9px 6px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);font-weight:700}
+.seg button.on{background:var(--sun);color:#04203a;border-color:#fff}
+
+/* ---------- info panel ---------- */
+#panel{position:fixed;right:12px;top:calc(66px + env(safe-area-inset-top,0px));z-index:15;width:min(410px,40vw);max-height:calc(100vh - 66px - var(--navh) - 20px - var(--safe-b) - var(--stageh,0px));overflow:auto;padding:16px 18px 18px;display:none;scrollbar-width:thin}
+#panel.show{display:block}
+#panel h3{margin:0 0 4px;font-size:22px;line-height:1.2}
+#panel .kick{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--sun);margin-bottom:4px}
+#panel p{margin:.5em 0}
+#panel ul{margin:.4em 0;padding-left:1.15em}#panel li{margin:.25em 0}
+.box{margin:.7em 0;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.09);border-left:4px solid var(--teal);font-size:15.5px}
+.box.an{border-color:var(--sun)} .box.nt{border-color:var(--warn);font-size:14.5px;color:#ffe3d4} .box.fact{border-color:var(--leaf)}
+.box>b:first-child{color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.1);font-weight:800;font-size:15px}
+.btn:hover{background:rgba(255,255,255,.2)}
+.btn.pri{background:linear-gradient(#7cecff,#22a8f0);color:#04203a;border-color:#fff}
+.btn.on{background:var(--sun);color:#04203a;border-color:#fff}
+.btn.sm{min-height:38px;padding:5px 12px;font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:.6em 0}
+.ctl{margin:.7em 0}.ctl label{display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin-bottom:3px}
+input[type=range]{width:100%;accent-color:var(--sun);height:28px}
+.bar{height:18px;border-radius:9px;background:rgba(255,255,255,.14);overflow:hidden;margin:3px 0 8px}
+.bar>i{display:block;height:100%;width:0;border-radius:9px;transition:width .25s}
+.bl{display:flex;justify-content:space-between;font-size:14px;font-weight:700}
+.sheet-handle{display:none}
+
+/* ---------- stage bar ---------- */
+#stagebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + 12px + var(--safe-b));z-index:16;width:min(920px,calc(100vw - 20px));padding:10px 12px;display:none}
+#stagebar.show{display:block}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.sc{flex:0 0 auto;min-width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);font-weight:800;font-size:15px;padding:0 10px;display:flex;align-items:center;gap:6px}
+.sc.on{background:var(--sun);color:#04203a;border-color:#fff}
+.sc.done{background:rgba(95,208,138,.28)}
+.sc .n{font-size:12px;opacity:.85}
+.sctl{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:2px}
+.prog{height:6px;border-radius:3px;background:rgba(255,255,255,.18);margin:2px 0 8px;overflow:hidden}.prog>i{display:block;height:100%;width:0;background:var(--sun)}
+
+/* ---------- nav ---------- */
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:6px;justify-content:flex-start;padding:6px 8px calc(6px + var(--safe-b));background:linear-gradient(rgba(5,16,38,0),rgba(5,16,38,.96) 35%);overflow-x:auto;scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+.nb:first-child{margin-left:auto}.nb:last-child{margin-right:auto}
+.pmin{display:none;position:absolute;right:8px;top:8px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.12);font-size:16px;padding:0}
+#panel.min>*:not(.pmin):not(.kick):not(h3){display:none}
+#panel.min{max-height:none!important;padding-bottom:10px}
+.nb{flex:0 0 auto;min-width:72px;height:54px;border-radius:14px;border:1px solid var(--line);background:rgba(5,16,38,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;gap:0;padding:2px 8px;line-height:1.15}
+.nb span.i{font-size:20px}
+.nb.on{background:var(--sun);color:#04203a;border-color:#fff}
+.nb:hover{background:var(--navy2)}.nb.on:hover{background:var(--sun)}
+
+/* ---------- modal ---------- */
+#modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(2,18,36,.72);padding:10px}
+#modal.open{display:flex}
+.sheet{width:min(1020px,100%);max-height:calc(100vh - 20px);display:flex;flex-direction:column;background:linear-gradient(#0a2a50,#050d1f);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden}
+.sheet header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.sheet header h2{margin:0;font-size:22px;flex:1}
+.sheet .body{padding:14px 18px 20px;overflow:auto;flex:1 1 auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);font-weight:800;min-height:42px}
+.tabs button.on{background:var(--sun);color:#04203a;border-color:#fff}
+.cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+canvas.lab{width:100%;height:auto;border-radius:14px;border:1px solid var(--line);background:#0c4a78;display:block;touch-action:manipulation}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.card{padding:14px;border-radius:14px;background:rgba(255,255,255,.09);border:1px solid var(--line);text-align:left}
+.card h4{margin:0 0 4px;font-size:18px}
+.card.click{cursor:pointer}.card.click:hover{background:rgba(255,255,255,.17)}
+.opt{display:block;width:100%;text-align:left;margin:7px 0;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:rgba(255,255,255,.08);font-weight:700;font-size:16.5px;min-height:48px}
+.opt:hover{background:rgba(255,255,255,.17)}
+.opt.ok{border-color:var(--leaf);background:rgba(95,208,138,.28)}
+.opt.no{border-color:var(--warn);background:rgba(255,157,108,.2)}
+.opt[disabled]{cursor:default;opacity:.95}
+.fb{margin:10px 0;padding:11px 14px;border-radius:12px;background:rgba(255,255,255,.1);border-left:5px solid var(--teal);font-size:16px}
+.fb.ok{border-color:var(--leaf)}.fb.no{border-color:var(--warn)}
+.big{font-size:44px;font-weight:900}
+.pill{display:inline-block;padding:3px 12px;border-radius:99px;background:rgba(255,255,255,.14);font-weight:800;font-size:14px}
+.qa{margin-top:8px}.qa summary{cursor:pointer;font-weight:800;color:var(--sun);min-height:32px}
+.lh{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seq{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.seq .tag{padding:6px 12px;border-radius:99px;background:var(--leaf);color:#04203a;font-weight:900}
+
+#toast{position:fixed;left:50%;bottom:calc(var(--navh) + 20px + var(--safe-b));transform:translate(-50%,30px);z-index:70;max-width:min(560px,92vw);padding:12px 18px;border-radius:14px;background:#fff;color:#04203a;font-weight:700;opacity:0;pointer-events:none;transition:.3s;display:flex;gap:12px;align-items:center}
+#toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast button{border:0;background:var(--navy);color:#fff;padding:7px 14px;border-radius:99px;font-weight:800}
+
+/* presentation mode */
+body.present #nav,body.present .tools .hide-p,body.present #top .brand,body.present #backBtn{display:none!important}
+body.present #panel{font-size:1.18em;width:min(520px,44vw)}
+body.present #stagebar .sctl .btn.opt-p{display:none}
+#exitP{display:none;position:fixed;left:10px;top:10px;z-index:60}
+body.present #exitP{display:inline-flex}
+
+body.is-title #nav,body.is-title #panel,body.is-title #stagebar{visibility:hidden}
+.sr{position:absolute;left:-9999px}
+#nowebgl{display:none}
+
+/* ---------- small screens ---------- */
+@media (max-width:860px){
+  :root{--navh:60px}
+  .tb.hide-m{display:none}.tools{flex-wrap:nowrap;gap:4px}.chip{padding:0 10px}.chip:not(.off) span{display:none}
+  #backBtn{padding:0 12px;white-space:nowrap;font-size:14px;margin-left:0}body.has-back .brand{display:none}
+  .pmin{display:grid;place-items:center}#panel h3{padding-right:40px}
+  .sctl .btn{padding:4px 10px;font-size:13px;min-height:38px}
+  #panel{left:8px;right:8px;width:auto;top:auto;bottom:calc(var(--navh) + 6px + var(--safe-b) + var(--stageh,0px));max-height:min(42vh,calc(100vh - 220px - var(--stageh,0px)));padding:12px 14px 14px}
+  #panel h3{font-size:19px}
+  .brand b{display:none}.brand{padding:4px 6px}
+  .tb{width:38px;height:38px;font-size:16px}
+  .tools{gap:4px}
+  .cols{grid-template-columns:1fr}
+  .sheet header h2{font-size:18px}
+  .nb{min-width:64px;height:50px;font-size:11.5px}
+  #stagebar{padding:8px 8px}
+  body.present #panel{width:auto}
+}
+@media (max-height:520px) and (orientation:landscape){
+  #panel{max-height:calc(100vh - 140px - var(--stageh,0px));width:min(380px,44vw);left:auto;right:8px;top:56px;bottom:auto}
+  #title h1{font-size:clamp(34px,9vh,80px)}
+  #title p.sup{display:none}
+  .start{margin-top:.6em;padding:10px 26px}
+}
+@media (prefers-reduced-motion:reduce){.start,.lbl.hs::after,#loader .drop{animation:none}}
+noscript{position:fixed;inset:0;z-index:99;background:#06304f;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;font-size:20px}
+
+.rt{width:100%;border-collapse:collapse;font-size:14px;margin:.5em 0}.rt th,.rt td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.14);text-align:left}.rt tr[data-act]{cursor:pointer}.rt tr.cur{background:rgba(53,212,255,.2)}
+canvas.lab{width:100%;max-width:640px;border-radius:12px;border:1px solid var(--line);display:block;margin:6px auto}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}@media(max-width:640px){.cols3{grid-template-columns:1fr}}
+.nb{max-width:104px;text-align:center}
+input[type=range]{accent-color:#35d4ff}
+</style>
+</head>
+<body>
+<noscript>This app needs JavaScript. Please enable JavaScript in your browser.</noscript>
+<canvas id="gl" tabindex="0" aria-label="3D magnetism laboratory. Drag empty space to rotate, scroll or pinch to zoom, drag magnets to move them."></canvas>
+<div id="labels" aria-hidden="false"></div>
+
+<div id="loader" role="status"><div class="drop">🧲</div><b style="font-size:20px">Loading Magnets &amp; Magnetism…</b><span id="loadmsg" style="color:#a9c8e6">Powering up the virtual lab</span></div>
+
+<section id="title" aria-label="Title page">
+  <h1>Magnets &amp;<br>Magnetism</h1>
+  <h2>Discover the Invisible Force</h2>
+  <p class="sup">Move magnets, reveal invisible magnetic fields, attract and repel objects, and become a scientist in your own virtual laboratory.</p>
+  <div class="cred"><small>Developed by</small>Mateen Yousuf — Teacher</div>
+  <button class="start" id="startBtn">ENTER THE LAB ▶</button>
+  <div class="tag">Predict. Experiment. Discover.</div>
+</section>
+
+<div id="top">
+  <div style="display:flex;align-items:center">
+    <div class="brand glass"><span class="i">🧲</span><b>Magnets &amp; Magnetism</b></div>
+    <button id="backBtn" aria-label="Return to the home page">← Home</button>
+  </div>
+  <div class="tools">
+    <span class="chip" id="netChip" role="status" aria-live="polite"><i></i><span>Online</span></span>
+    <button id="installBtn" aria-label="Install this app">⬇ Install App</button>
+    <button class="tb" id="pauseBtn" aria-label="Pause animation" title="Pause / resume (Space)">⏸</button>
+    <button class="tb" id="resetCam" aria-label="Reset camera" title="Reset camera">⌖</button>
+    <button class="tb hide-p hide-m" id="zoomIn" aria-label="Zoom in" title="Zoom in">＋</button>
+    <button class="tb hide-p hide-m" id="zoomOut" aria-label="Zoom out" title="Zoom out">－</button>
+    <button class="tb" id="lblBtn" aria-label="Show or hide labels" title="Labels">🏷</button>
+    <button class="tb" id="setBtn" aria-label="Settings" title="Settings">⚙</button>
+    <button class="tb" id="presBtn" aria-label="Presentation mode" title="Presentation mode">📽</button>
+  </div>
+</div>
+<button class="btn pri" id="exitP" aria-label="Exit presentation mode">✕ Exit presentation</button>
+
+<div id="settings" class="glass" role="dialog" aria-label="Settings">
+  <label for="spd">Animation speed: <span id="spdv">1×</span></label>
+  <input type="range" id="spd" min="0.4" max="2.4" step="0.1" value="1">
+  <label>Graphics</label>
+  <div class="seg" id="gfxSeg"><button data-g="high">High</button><button data-g="low">Low (faster)</button></div>
+  <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Low graphics uses fewer particles and a lower resolution. Good for older phones.</p>
+</div>
+
+<aside id="panel" class="glass" aria-live="polite"></aside>
+<div id="stagebar" class="glass"></div>
+<nav id="nav" aria-label="Main navigation"></nav>
+<div id="modal" role="dialog" aria-modal="true"></div>
+<div id="toast" role="status"></div>
+
+<script src="three.min.js"></script>
+<script>
+
+/* =====================================================================
+   MAGNETS & MAGNETISM — Developed by Mateen Yousuf, Teacher
+   ===================================================================== */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const wrapPi = a => { a = (a + Math.PI) % (2 * Math.PI); if (a < 0) a += 2 * Math.PI; return a - Math.PI; };
+function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const rnd = mulberry(4242);
+const shuffle = (arr, r) => { const a = arr.slice(); const R = r || Math.random; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+/* safe storage (may throw in private windows) */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('mg_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('mg_' + k, JSON.stringify(v)); } catch (e) { } }
+};
+
+/* shared state */
+const W = { mode: 'title', speed: 1, paused: false, labels: true, gfx: 'high', present: false, modalOpen: false, lines: true };
+const NO3D = { v: false };
+
+function toast(msg, btn, cb, ms) {
+  const t = $('#toast'); t.innerHTML = '<span></span>';
+  t.firstChild.textContent = msg;
+  if (btn) { const b = document.createElement('button'); b.textContent = btn; b.onclick = () => { t.classList.remove('show'); cb && cb(); }; t.appendChild(b); }
+  t.classList.add('show'); clearTimeout(toast._t);
+  if (ms !== 0) toast._t = setTimeout(() => t.classList.remove('show'), ms || 3200);
+}
+
+/* =====================================================================
+   ENGINE: scene, magnets (pole model), items, field lines, filings, compass, camera
+   ===================================================================== */
+const TB = { x: 15, z: 9.5 };       /* half-size of the lab bench */
+const MAGY = 0.45;                  /* height of a magnet's centre above the bench */
+const KF = 150;                     /* pole–pole force constant (illustrative units) */
+const KI = 70;                      /* force on magnetic objects */
+const EPS = 0.7;                    /* softening so forces stay finite */
+const EARTH = 0.04;                 /* simple Earth-field strength (points to −z = "north") */
+const POLE_N = 0xff4d5e, POLE_S = 0x3b82ff;
+
+let renderer, scene, camera, clock, tableG, tableMesh, floorG, bgPts, selRing, T = 0;
+const MAGS = [];                    /* active magnets */
+const ITEMS = [];                   /* active small objects (magnetic or not) */
+const PX = { value: 600 };
+
+/* ---------- textures ---------- */
+function glowTex(c1, c2) {
+  const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, c1 || 'rgba(255,255,255,1)'); gr.addColorStop(.35, c2 || 'rgba(120,220,255,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(c); return t;
+}
+function badgeTex(txt, col) {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = col; g.beginPath(); g.arc(64, 64, 58, 0, 6.3); g.fill(); g.lineWidth = 7; g.strokeStyle = '#fff'; g.stroke();
+  g.fillStyle = '#fff'; g.font = '900 78px system-ui,Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, 64, 68);
+  return new THREE.CanvasTexture(c);
+}
+const BADGE = {};
+function badge(kind) { if (!BADGE[kind]) { BADGE[kind] = new THREE.SpriteMaterial({ map: badgeTex(kind, kind === 'N' ? '#e0223a' : '#2468e8'), transparent: true, depthTest: false }); } return BADGE[kind]; }
+function textSprite(txt, col, scale, bg) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 96; const g = c.getContext('2d');
+  if (bg) { g.fillStyle = bg; g.beginPath(); g.roundRect ? g.roundRect(6, 6, 500, 84, 30) : g.rect(6, 6, 500, 84); g.fill(); }
+  g.fillStyle = col || '#fff'; g.font = '800 46px system-ui,Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, 256, 52);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false })); s.scale.set(scale * 5.33, scale, 1); s.renderOrder = 12; return s;
+}
+
+/* ---------- materials ---------- */
+const M = {};
+function initMats() {
+  const S = (c, m, r, o) => new THREE.MeshStandardMaterial(Object.assign({ color: c, metalness: m, roughness: r }, o || {}));
+  M.red = S(0xe0233a, .3, .4); M.blue = S(0x2468e8, .3, .4); M.steel = S(0xdbe4ee, .45, .35); M.iron = S(0x8d99a8, .4, .5);
+  M.dark = S(0x1a2540, .3, .6); M.copper = S(0xe0833a, .45, .4); M.gold = S(0xf2c14e, .8, .3); M.white = S(0xf2f6fb, .1, .6); M.wood = S(0x9a6a3a, 0, .8);
+  M.plastic = S(0xf5c518, 0, .45); M.rubber = S(0x23262c, 0, .9); M.glass = S(0x9fd8ff, .1, .05, { transparent: true, opacity: .4 }); M.alu = S(0xe6ebf0, .4, .5);
+  M.nickel = S(0xe2e5e8, .45, .4); M.cobalt = S(0x6f9ad0, .4, .45); M.wire = S(0xff8a3d, .6, .4); M.cyan = new THREE.MeshBasicMaterial({ color: 0x35d4ff });
+  M.edge = new THREE.LineBasicMaterial({ color: 0xbfe9ff, transparent: true, opacity: .28 });
+}
+function boxM(w, h, d, mat, x, y, z, parent) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x || 0, y || 0, z || 0); if (parent) parent.add(m); return m; }
+function cylM(r, h, mat, x, y, z, parent, seg) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg || 24), mat); m.position.set(x || 0, y || 0, z || 0); if (parent) parent.add(m); return m; }
+function edgesOf(mesh) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), M.edge); mesh.add(e); }
+
+/* ---------- magnets (pole model) ---------- */
+class Mag {
+  constructor(kind, o) {
+    o = o || {}; this.kind = kind; this.x = o.x || 0; this.z = o.z || 0; this.ang = o.ang || 0; this.vx = this.vz = this.w = 0; this.fx = this.fz = this.tq = 0;
+    this.gy = o.gy || 0; this.qs = o.qs === undefined ? 1 : o.qs; this.fixed = !!o.fixed; this.lockX = !!o.lockX; this.lockZ = !!o.lockZ; this.lockRot = !!o.lockRot;
+    this.phys = o.phys !== false; this.name = o.name || 'Magnet'; this.dragged = false; this.tang = undefined; this.labels = o.labels !== false; this.lscale = o.lscale || 1.25;
+    this.g = new THREE.Group(); scene.add(this.g); this.wp = []; this.poles = []; this.circ = []; this.selR = 3.4; this.isMag = true; this.noDrag = !!o.noDrag; this.cpoles = o.poles || []; this.ccirc = o.circ || [];
+    this.build();
+  }
+  build() {
+    const g = this.g; while (g.children.length) { const c = g.children[0]; g.remove(c); if (c.geometry) c.geometry.dispose(); }
+    this.parts = []; const k = this.kind;
+    if (k === 'bar') {
+      this.poles = [{ lx: 2.6, lz: 0, q: 1 }, { lx: -2.6, lz: 0, q: -1 }]; this.circ = [[-2.2, 0, .85], [0, 0, .85], [2.2, 0, .85]]; this.selR = 3.7;
+      const a = boxM(3, .9, 1.3, M.red, 1.5, MAGY, 0, g), b = boxM(3, .9, 1.3, M.blue, -1.5, MAGY, 0, g); edgesOf(a); edgesOf(b);
+      boxM(.04, .92, 1.32, M.white, 0, MAGY, 0, g);
+    } else if (k === 'horseshoe') {
+      this.poles = [{ lx: 2.1, lz: 1.3, q: 1 }, { lx: 2.1, lz: -1.3, q: -1 }];
+      this.circ = [[1.9, 1.3, .7], [1.9, -1.3, .7], [.4, 1.3, .7], [.4, -1.3, .7], [-1.4, .95, .8], [-1.4, -.95, .8], [-2.3, 0, .85]]; this.selR = 3.7;
+      const mk = (pts, mat) => { const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, .45, 10, false), mat); m.position.y = MAGY; g.add(m); return m; };
+      const red = [], blue = [];
+      for (let x = 2.1; x >= -1.5; x -= .6) red.push(new THREE.Vector3(x, 0, 1.3), new THREE.Vector3(x - .3, 0, 1.3));
+      red.push(new THREE.Vector3(-1.5, 0, 1.3));
+      for (let a = 90; a <= 180; a += 15) { const r = a * Math.PI / 180; red.push(new THREE.Vector3(-1.5 + 1.3 * Math.cos(r), 0, 1.3 * Math.sin(r))); }
+      for (let a = 180; a <= 270; a += 15) { const r = a * Math.PI / 180; blue.push(new THREE.Vector3(-1.5 + 1.3 * Math.cos(r), 0, 1.3 * Math.sin(r))); }
+      for (let x = -1.5; x <= 2.1; x += .6) blue.push(new THREE.Vector3(x, 0, -1.3), new THREE.Vector3(x + .3, 0, -1.3));
+      const dd = (arr) => { const o = []; arr.forEach((p, i) => { if (!i || p.distanceTo(o[o.length - 1]) > .05) o.push(p); }); return o; };
+      mk(dd(red), M.red); mk(dd(blue), M.blue);
+      [1.3, -1.3].forEach(z => { const c = cylM(.47, .18, M.steel, 2.12, MAGY, z, g, 16); c.rotation.z = Math.PI / 2; });
+    } else if (k === 'custom') { this.poles = this.cpoles; this.circ = this.ccirc; }
+    this.lab = [];
+    if (this.labels && this.poles.length) this.poles.forEach(p => { const s = new THREE.Sprite(badge(p.q > 0 ? 'N' : 'S')); s.renderOrder = 11; s.position.set(p.lx, MAGY + 1.35, p.lz); s.scale.set(this.lscale, this.lscale, 1); g.add(s); this.lab.push(s); });
+    this.sync();
+  }
+  setKind(k) { this.kind = k; this.build(); }
+  showLabels(on, sc) { this.labels = on; if (sc) this.lscale = sc; this.lab.forEach(s => { s.visible = on; s.scale.set(this.lscale, this.lscale, 1); }); }
+  setLabelsAbove(h) { this.lab.forEach(s => s.position.y = h); }
+  sync() { this.g.position.set(this.x, this.gy, this.z); this.g.rotation.y = -this.ang; }
+  updWorld() {
+    const c = Math.cos(this.ang), s = Math.sin(this.ang), P = this.poles;
+    for (let i = 0; i < P.length; i++) {
+      const p = P[i]; let w = this.wp[i]; if (!w) { w = this.wp[i] = { x: 0, y: 0, z: 0, q: 0, m: this, cx: 0, cz: 0 }; }
+      w.x = this.x + p.lx * c - p.lz * s; w.z = this.z + p.lx * s + p.lz * c; w.y = MAGY + this.gy; w.q = p.q * this.qs; w.cx = this.x; w.cz = this.z;
+    }
+    this.wp.length = P.length;
+  }
+  toWorld(lx, lz, out) { const c = Math.cos(this.ang), s = Math.sin(this.ang); out.x = this.x + lx * c - lz * s; out.z = this.z + lx * s + lz * c; return out; }
+  toLocal(wx, wz, out) { const c = Math.cos(this.ang), s = Math.sin(this.ang), dx = wx - this.x, dz = wz - this.z; out.x = dx * c + dz * s; out.z = -dx * s + dz * c; return out; }
+  rotateBy(d) { this.tang = (this.tang === undefined ? this.ang : this.tang) + d; this.w = 0; }
+  worldCircles(out) { const c = Math.cos(this.ang), s = Math.sin(this.ang); out.length = 0; for (const k of this.circ) out.push([this.x + k[0] * c - k[1] * s, this.z + k[0] * s + k[1] * c, k[2]]); return out; }
+  dispose() { scene.remove(this.g); this.g.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+}
+function clearMags() { while (MAGS.length) MAGS.pop().dispose(); }
+
+/* ---------- small objects ---------- */
+const MATS = {
+  iron: { name: 'Iron', s: 1.0, mat: 'iron' }, steel: { name: 'Steel', s: .85, mat: 'steel' }, nickel: { name: 'Nickel', s: .55, mat: 'nickel' }, cobalt: { name: 'Cobalt', s: .65, mat: 'cobalt' },
+  wood: { name: 'Wood', s: 0, mat: 'wood' }, plastic: { name: 'Plastic', s: 0, mat: 'plastic' }, paper: { name: 'Paper', s: 0, mat: 'white' }, glass: { name: 'Glass', s: 0, mat: 'glass' },
+  copper: { name: 'Copper', s: 0, mat: 'copper' }, aluminium: { name: 'Aluminium', s: 0, mat: 'alu' }, rubber: { name: 'Rubber', s: 0, mat: 'rubber' }
+};
+function itemMesh(key) {
+  const g = new THREE.Group(), mm = M[MATS[key] ? MATS[key].mat : 'steel']; let r = .6;
+  const add = o => { o.position.y = o.position.y || 0; g.add(o); return o; };
+  switch (key) {
+    case 'iron': { const b = boxM(1.1, 1.1, 1.1, mm, 0, .55, 0, g); edgesOf(b); r = .8; break; }
+    case 'steel': { const s = new THREE.Mesh(new THREE.SphereGeometry(.62, 24, 16), mm); s.position.y = .62; g.add(s); r = .65; break; }
+    case 'nickel': { cylM(.75, .18, mm, 0, .09, 0, g, 28); r = .75; break; }
+    case 'cobalt': { const b = boxM(1.0, .8, 1.0, mm, 0, .4, 0, g); edgesOf(b); r = .75; break; }
+    case 'wood': { const b = boxM(1.5, .6, .9, mm, 0, .3, 0, g); edgesOf(b); r = .85; break; }
+    case 'plastic': { const b = boxM(1.0, 1.0, 1.0, mm, 0, .5, 0, g); edgesOf(b); r = .75; break; }
+    case 'paper': { boxM(1.5, .05, 1.1, mm, 0, .03, 0, g); r = .85; break; }
+    case 'glass': { const s = new THREE.Mesh(new THREE.SphereGeometry(.65, 24, 16), mm); s.position.y = .65; g.add(s); r = .68; break; }
+    case 'copper': { cylM(.75, .18, mm, 0, .09, 0, g, 28); r = .75; break; }
+    case 'aluminium': { cylM(.5, 1.1, mm, 0, .55, 0, g, 24); r = .55; break; }
+    case 'rubber': { const b = boxM(1.3, .55, .8, mm, 0, .28, 0, g); edgesOf(b); r = .8; break; }
+    case 'clip': { const t = new THREE.Mesh(new THREE.TorusGeometry(.3, .05, 6, 18), M.steel); t.scale.set(1.7, 1, 1); t.rotation.x = Math.PI / 2; t.position.y = .06; g.add(t); const t2 = new THREE.Mesh(new THREE.TorusGeometry(.2, .045, 6, 14), M.steel); t2.scale.set(1.7, 1, 1); t2.rotation.x = Math.PI / 2; t2.position.set(.08, .1, 0); g.add(t2); r = .55; break; }
+    case 'nail': { const c = cylM(.12, 2.6, M.iron, 0, .14, 0, g, 12); c.rotation.z = Math.PI / 2; const tip = new THREE.Mesh(new THREE.ConeGeometry(.12, .4, 12), M.iron); tip.rotation.z = Math.PI / 2; tip.position.set(1.5, .14, 0); g.add(tip); const hd = cylM(.3, .1, M.iron, -1.3, .14, 0, g, 16); hd.rotation.z = Math.PI / 2; r = 1.2; break; }
+  }
+  return { g, r };
+}
+class Item {
+  constructor(key, x, z, o) {
+    o = o || {}; this.key = key; const d = MATS[key] || { name: key === 'clip' ? 'Steel paper clip' : key === 'nail' ? 'Iron nail' : key, s: key === 'clip' || key === 'nail' ? 1 : 0 };
+    this.name = d.name; this.s = o.s !== undefined ? o.s : d.s; const im = itemMesh(key); this.g = im.g; this.r = im.r; this.x = x; this.z = z; this.ang = o.ang || 0; this.vx = this.vz = 0;
+    this.host = null; this.loc = { x: 0, z: 0 }; this.dragged = false; this.locked = false; this.isItem = true; this.selR = this.r + .5; this.test = 0; this.res = null; this.tmr = 0; this.noDrag = !!o.noDrag;
+    scene.add(this.g); this.sync(); ITEMS.push(this);
+  }
+  sync() { this.g.position.set(this.x, this.y || 0, this.z); this.g.rotation.y = -this.ang; }
+  dispose() { scene.remove(this.g); this.g.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+}
+function clearItems() { while (ITEMS.length) ITEMS.pop().dispose(); }
+
+/* ---------- field maths ---------- */
+const _o = { x: 0, y: 0, z: 0 };
+function polesAll(into) {
+  const L = into || []; L.length = 0;
+  for (const m of MAGS) { if (!m.g.visible) continue; m.updWorld(); for (const p of m.wp) if (Math.abs(p.q) > 1e-4) L.push(p); }
+  return L;
+}
+function fieldAt(x, y, z, P, out) {
+  let bx = 0, by = 0, bz = 0;
+  for (let i = 0; i < P.length; i++) {
+    const p = P[i], dx = x - p.x, dy = y - p.y, dz = z - p.z, r2 = dx * dx + dy * dy + dz * dz + EPS * EPS, k = p.q / (r2 * Math.sqrt(r2));
+    bx += k * dx; by += k * dy; bz += k * dz;
+  }
+  out.x = bx; out.y = by; out.z = bz; return out;
+}
+const PL = [];  /* scratch pole list */
+const levelName = f => f < .02 ? 'Very weak' : f < .06 ? 'Weak' : f < .18 ? 'Medium' : f < .5 ? 'Strong' : 'Very strong';
+
+/* ---------- field lines (visual model) ---------- */
+class FieldViz {
+  constructor(maxLines, maxSteps, o) {
+    o = o || {}; this.ML = maxLines; this.MS = maxSteps; this.n = 0; this.show = true; this.bead = o.bead !== false; this.scale = o.scale || 1;
+    const nv = maxLines * maxSteps * 2;
+    this.pos = new Float32Array(nv * 3); this.col = new Float32Array(nv * 3);
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(this.pos, 3).setUsage(35048)); g.setAttribute('color', new THREE.BufferAttribute(this.col, 3).setUsage(35048)); g.setDrawRange(0, 0);
+    this.lines = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); this.lines.frustumCulled = false; this.lines.renderOrder = 5;
+    this.paths = []; for (let i = 0; i < maxLines; i++)this.paths.push({ s: 0, n: 0 });
+    this.bp = new Float32Array(maxLines * 3); const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.BufferAttribute(this.bp, 3).setUsage(35048)); bg.setDrawRange(0, 0);
+    this.beads = new THREE.Points(bg, new THREE.PointsMaterial({ size: .5 * this.scale, map: glowTex('rgba(255,255,255,1)', 'rgba(150,240,255,.7)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true })); this.beads.frustumCulled = false; this.beads.renderOrder = 6;
+    this.group = new THREE.Group(); this.group.add(this.lines, this.beads); scene.add(this.group); this.t = 0; this.tmp = { x: 0, y: 0, z: 0 };
+  }
+  setVisible(v) { this.show = v; this.group.visible = v; }
+  update(P, o) {
+    if (!this.show) return; o = o || {}; const d3 = !!o.d3, want = Math.min(this.ML, o.n || 16), h = o.step || .2, y2 = o.y === undefined ? MAGY : o.y, R = o.R || 18, B = this.tmp;
+    let posQ = 0; for (const p of P) if (p.q > 0) posQ += p.q; if (posQ <= 0) { this.lines.geometry.setDrawRange(0, 0); this.beads.geometry.setDrawRange(0, 0); this.n = 0; return; }
+    let li = 0, vi = 0; const pos = this.pos, col = this.col, MS = this.MS;
+    for (const p of P) {
+      if (p.q <= 0) continue; let cnt = Math.max(2, Math.round(want * p.q / posQ)); if (li + cnt > this.ML) cnt = this.ML - li;
+      let ax = p.x - p.cx, az = p.z - p.cz, ay = p.axy || 0; const al = Math.hypot(ax, ay, az) || 1; ax /= al; az /= al; ay /= al;
+      for (let i = 0; i < cnt; i++) {
+        const u = (i + .5) / cnt; let dx, dy = 0, dz;
+        if (d3) { const ct = 1 - u * 1.17, st = Math.sqrt(Math.max(0, 1 - ct * ct)), ph = i * 2.39996; let e1x = ay * 0 - az * 1, e1y = 0, e1z = ax * 1 - 0; /* a x up */ let el = Math.hypot(e1x, e1z); if (el < .01) { e1x = 1; e1z = 0; e1y = 0; el = 1; } e1x /= el; e1z /= el; const e2x = ay * e1z - az * e1y, e2y = az * e1x - ax * e1z, e2z = ax * e1y - ay * e1x, cp = Math.cos(ph) * st, sp = Math.sin(ph) * st; dx = ax * ct + e1x * cp + e2x * sp; dy = ay * ct + e1y * cp + e2y * sp; dz = az * ct + e1z * cp + e2z * sp; }
+        else { const a0 = Math.atan2(az, ax) + (u - .5) * 3.5; dx = Math.cos(a0); dz = Math.sin(a0); }
+        let x = p.x + dx * .55, y = d3 ? p.y + dy * .55 : y2, z = p.z + dz * .55, steps = 0; const path = this.paths[li]; path.s = vi; 
+        let px = x, py = y, pz = z;
+        for (; steps < MS; steps++) {
+          fieldAt(x, y, z, P, B); if (!d3) B.y = 0; const bl = Math.hypot(B.x, B.y, B.z) || 1e-6;
+          const t = clamp(Math.log(bl / .004) / 3.2, 0, 1), br = .12 + .88 * t;
+          const k = vi * 3; pos[k] = px; pos[k + 1] = py; pos[k + 2] = pz;
+          x += B.x / bl * h; y += B.y / bl * h; z += B.z / bl * h;
+          pos[k + 3] = x; pos[k + 4] = y; pos[k + 5] = z;
+          col[k] = .1 * br + .15 * t; col[k + 1] = .55 * br + .45 * t; col[k + 2] = 1 * br; col[k + 3] = col[k]; col[k + 4] = col[k + 1]; col[k + 5] = col[k + 2];
+          vi += 2; px = x; py = y; pz = z;
+          let end = false; for (const q of P) { if (q.q < 0) { const ddx = x - q.x, ddy = y - q.y, ddz = z - q.z; if (ddx * ddx + (d3 ? ddy * ddy : 0) + ddz * ddz < .3) { end = true; break; } } }
+          if (end || x * x + z * z + y * y > R * R) break;
+        }
+        path.n = steps + 1; li++;
+      }
+    }
+    this.n = li; this.lines.geometry.setDrawRange(0, vi); this.lines.geometry.attributes.position.needsUpdate = true; this.lines.geometry.attributes.color.needsUpdate = true;
+    this.beads.geometry.setDrawRange(0, this.bead ? li : 0);
+  }
+  tick(dt) {
+    if (!this.show || !this.bead) return; this.t += dt; const bp = this.bp, pos = this.pos;
+    for (let i = 0; i < this.n; i++) {
+      const p = this.paths[i]; if (p.n < 2) { bp[i * 3 + 1] = -99; continue; }
+      const f = ((this.t * .22 + i * .137) % 1) * (p.n - 1), s = Math.floor(f), fr = f - s, k = (p.s + s * 2) * 3;
+      bp[i * 3] = lerp(pos[k], pos[k + 3], fr); bp[i * 3 + 1] = lerp(pos[k + 1], pos[k + 4], fr); bp[i * 3 + 2] = lerp(pos[k + 2], pos[k + 5], fr);
+    }
+    this.beads.geometry.attributes.position.needsUpdate = true;
+  }
+}
+
+/* ---------- iron filings ---------- */
+class Filings {
+  constructor(max, hx, hz, y) {
+    this.max = max; this.n = 0; this.hx = hx; this.hz = hz; this.y = y; this.x = new Float32Array(max); this.z = new Float32Array(max); this.a = new Float32Array(max); this.stop = new Float32Array(max); this.v = new Float32Array(max);
+    this.mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(.3, .03, .05), new THREE.MeshBasicMaterial({ color: 0xeaf3ff }), max); this.mesh.count = 0; this.mesh.frustumCulled = false; scene.add(this.mesh);
+    this.dummy = new THREE.Object3D(); this.tap = 0; this.pause = false; this.has = new Uint8Array(max); this.needLayout = true; this.B = { x: 0, y: 0, z: 0 };
+  }
+  add(k) { const r = Math.random; for (let i = 0; i < k && this.n < this.max; i++) { const j = this.n++; this.x[j] = (r() * 2 - 1) * this.hx; this.z[j] = (r() * 2 - 1) * this.hz; this.a[j] = r() * 6.283; this.stop[j] = .55 + r() * .9; this.v[j] = .6 + r() * .8; } this.mesh.count = this.n; this.needLayout = true; }
+  clear() { this.n = 0; this.mesh.count = 0; }
+  layout(P) {
+    const pool = [], B = { x: 0, y: 0, z: 0 }, hx = this.hx, hz = this.hz, y = this.y; const pos = P.filter(p => p.q > 0);
+    for (const p of pos) { const nl = 60; for (let i = 0; i < nl; i++) { const a = i / nl * 6.2832 + .05; let x = p.x + Math.cos(a) * .5, z = p.z + Math.sin(a) * .5, acc = 0;
+      for (let k = 0; k < 260; k++) { fieldAt(x, y, z, P, B); const l = Math.hypot(B.x, B.z) || 1e-6; x += B.x / l * .16; z += B.z / l * .16; acc += .16; if (acc >= .3) { acc = 0; pool.push(x, z); }
+        let end = Math.abs(x) > hx || Math.abs(z) > hz; for (const q of P) if (q.q < 0 && Math.hypot(x - q.x, z - q.z) < .45) end = true; if (end) break; } } }
+    const n = pool.length / 2; this.pool = pool; this.tx = this.tx && this.tx.length >= this.max ? this.tx : new Float32Array(this.max); this.tz = this.tz && this.tz.length >= this.max ? this.tz : new Float32Array(this.max);
+    const idx = Array.from({ length: n }, (_, i) => i); for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
+    for (let i = 0; i < this.n; i++) { if (n && i < n * .85) { const k = idx[i % n]; this.tx[i] = pool[k * 2] + (Math.random() - .5) * .12; this.tz[i] = pool[k * 2 + 1] + (Math.random() - .5) * .12; this.has[i] = 1; } else this.has[i] = 0; }
+    this.needLayout = false;
+  }
+  update(dt, P, force) {
+    if (this.pause && !force) return; const B = this.B, y = this.y, n = this.n, dm = this.dummy; if (!n) return;
+    const tapping = this.tap > 0; if (tapping) { this.tap -= dt; if (this.needLayout) this.layout(P); }
+    for (let i = 0; i < n; i++) {
+      let x = this.x[i], z = this.z[i]; fieldAt(x, y, z, P, B); const bl = Math.hypot(B.x, B.z);
+      if (bl > 1e-4) { const ta = Math.atan2(B.z, B.x); let d = wrapPi(ta - this.a[i]); if (d > 1.5708) d -= 3.1416; else if (d < -1.5708) d += 3.1416; const k = clamp(bl * 14, 0, 1) * (tapping ? 14 : 1.2) + (tapping ? 2 : 0); this.a[i] += d * Math.min(1, k * dt); }
+      else if (tapping) this.a[i] += (Math.random() - .5) * 1.4;
+      if (tapping && this.has[i]) { const k = Math.min(1, dt * (1.2 + this.v[i] * 1.2)); x += (this.tx[i] - x) * k + (Math.random() - .5) * .03; z += (this.tz[i] - z) * k + (Math.random() - .5) * .03; }
+      x = clamp(x, -this.hx, this.hx); z = clamp(z, -this.hz, this.hz); this.x[i] = x; this.z[i] = z;
+      dm.position.set(x, y, z); dm.rotation.set(0, -this.a[i], 0); dm.updateMatrix(); this.mesh.setMatrixAt(i, dm.matrix);
+    }
+    this.mesh.instanceMatrix.needsUpdate = true;
+  }
+}
+
+/* ---------- compass ---------- */
+class Compass {
+  constructor(o) {
+    o = o || {}; this.x = o.x || 0; this.z = o.z || 0; this.ang = -Math.PI / 2 + (o.a0 || 0); this.w = 0; this.r = 1.6; this.circ = [[0, 0, 1.6]]; this.selR = 2.3; this.name = 'Compass'; this.noDrag = !!o.noDrag; this.earth = o.earth !== false; this.isCompass = true; this.k = o.k || 1; this.y = o.y || 0; this.rscale = o.scale || 1;
+    const g = this.g = new THREE.Group(); const base = cylM(1.6, .3, M.dark, 0, .15, 0, g, 40); edgesOf(base);
+    const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); x.fillStyle = '#0a1a38'; x.fillRect(0, 0, 256, 256); x.translate(128, 128);
+    x.strokeStyle = '#35d4ff'; x.lineWidth = 3; x.beginPath(); x.arc(0, 0, 118, 0, 6.3); x.stroke();
+    for (let i = 0; i < 36; i++) { x.save(); x.rotate(i * Math.PI / 18); x.beginPath(); x.moveTo(0, -118); x.lineTo(0, -(i % 9 === 0 ? 96 : 108)); x.lineWidth = i % 9 === 0 ? 4 : 2; x.stroke(); x.restore(); }
+    x.fillStyle = '#fff'; x.font = '900 34px system-ui'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('N', 0, -74); x.fillText('S', 0, 78); x.fillText('E', 76, 2); x.fillText('W', -76, 2);
+    const face = new THREE.Mesh(new THREE.CircleGeometry(1.45, 40), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c) })); face.rotation.x = -Math.PI / 2; face.position.y = .32; g.add(face);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(1.5, 24, 12, 0, 6.283, 0, 1.2), new THREE.MeshStandardMaterial({ color: 0xbfe9ff, transparent: true, opacity: .16, roughness: .05, metalness: .2, depthWrite: false })); dome.position.y = .3; dome.renderOrder = 8; g.add(dome);
+    const nd = this.needle = new THREE.Group(); nd.position.y = .45; const rn = new THREE.Mesh(new THREE.ConeGeometry(.2, 1.35, 4), new THREE.MeshStandardMaterial({ color: 0xff3347, emissive: 0xaa1020, emissiveIntensity: .6, roughness: .4 })); rn.rotation.z = -Math.PI / 2; rn.position.x = .68; rn.scale.set(1, 1, .45); nd.add(rn);
+    const wn = new THREE.Mesh(new THREE.ConeGeometry(.2, 1.35, 4), new THREE.MeshStandardMaterial({ color: 0xe8eef6, roughness: .4 })); wn.rotation.z = Math.PI / 2; wn.position.x = -.68; wn.scale.set(1, 1, .45); nd.add(wn);
+    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex('rgba(255,90,100,.9)', 'rgba(255,60,80,.35)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); gl.scale.set(1.5, 1.5, 1); gl.position.set(1.0, .05, 0); nd.add(gl);
+    cylM(.1, .22, M.steel, 0, .02, 0, nd, 12); g.add(nd); g.scale.setScalar(this.rscale); scene.add(g); this.sync();
+  }
+  sync() { this.g.position.set(this.x, this.y, this.z); this.needle.rotation.y = -this.ang; }
+  field(P, B) { fieldAt(this.x, .55 + this.y, this.z, P, B); B.y = 0; if (this.earth) B.z -= EARTH; return B; }
+  update(dt, P, B) {
+    this.field(P, B); const bl = Math.hypot(B.x, B.z); if (bl < 1e-5) { this.w *= Math.exp(-dt * 2); this.ang += this.w * dt; this.sync(); return bl; }
+    const ta = Math.atan2(B.z, B.x), err = wrapPi(ta - this.ang), G = 900 * this.k, wn = Math.sqrt(G * bl), D = 1.15 * wn;
+    const h = Math.min(dt, .033), n = Math.ceil(dt / h); for (let i = 0; i < n; i++) { this.w += (G * bl * Math.sin(err) - D * this.w) * h; this.w = clamp(this.w, -12, 12); this.ang += this.w * h; }
+    this.sync(); return bl;
+  }
+  bearing() { /* degrees clockwise from the "north" (−z) direction as seen from above */ let d = (Math.atan2(Math.cos(this.ang), -Math.sin(this.ang))) * 180 / Math.PI; return ((d % 360) + 360) % 360; }
+  dispose() { scene.remove(this.g); this.g.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+}
+const COMP = [];   /* compasses that follow the field in the active stage */
+
+/* ---------- physics ---------- */
+const _wc1 = [], _wc2 = [], _t1 = { x: 0, z: 0 };
+function physStep(dt, opt) {
+  opt = opt || {}; const n = 3, h = dt / n, FM = 70;
+  for (let s = 0; s < n; s++) {
+    for (const m of MAGS) { m.updWorld(); m.fx = m.fz = m.tq = 0; }
+    for (let i = 0; i < MAGS.length; i++) for (let j = i + 1; j < MAGS.length; j++) {
+      const a = MAGS[i], b = MAGS[j]; if (!a.phys || !b.phys || !a.g.visible || !b.g.visible) continue;
+      for (const pa of a.wp) for (const pb of b.wp) {
+        const dx = pb.x - pa.x, dz = pb.z - pa.z, d = Math.hypot(dx, dz) || 1e-3, r2 = d * d + EPS * EPS; let f = KF * pa.q * pb.q / r2; f = clamp(f, -FM, FM);
+        const fx = f * dx / d, fz = f * dz / d;
+        b.fx += fx; b.fz += fz; b.tq += (pb.x - b.x) * fz - (pb.z - b.z) * fx; a.fx -= fx; a.fz -= fz; a.tq -= (pa.x - a.x) * fz - (pa.z - a.z) * fx;
+      }
+    }
+    for (const m of MAGS) {
+      if (!m.phys) continue;
+      if (m.tang !== undefined) { const d = m.tang - m.ang; m.ang += d * Math.min(1, h * 12); if (Math.abs(d) < .004) { m.ang = m.tang; m.tang = undefined; } m.vx *= .9; m.vz *= .9; continue; }
+      if (m.fixed || m.dragged) { m.vx = m.vz = m.w = 0; continue; }
+      const I = 1.6, c = 1.9, ca = 5.5; let fx = m.fx, fz = m.fz, tq = m.tq; if (m.lockX) { fx = 0; } if (m.lockZ) { fz = 0; } if (m.lockRot) tq = 0;
+      const fm = Math.hypot(fx, fz); 
+      m.vx += fx * h; m.vz += fz * h; m.w += tq / I * h; const dm = Math.exp(-c * h), da = Math.exp(-ca * h); m.vx *= dm; m.vz *= dm; m.w *= da; if (m.lockRot) m.w = 0;
+      if (fm < .2 && Math.hypot(m.vx, m.vz) < .08) { m.vx = m.vz = 0; } if (Math.abs(tq) < .25 && Math.abs(m.w) < .05) m.w = 0;
+      const sp = Math.hypot(m.vx, m.vz); if (sp > 16) { m.vx *= 16 / sp; m.vz *= 16 / sp; }
+      m.w = clamp(m.w, -9, 9); m.x += m.vx * h; m.z += m.vz * h; m.ang += m.w * h;
+      const bx = (opt.bx || TB.x) - 2.3, bz = (opt.bz || TB.z) - 1.8; if (m.x > bx) { m.x = bx; m.vx = Math.min(0, m.vx); } if (m.x < -bx) { m.x = -bx; m.vx = Math.max(0, m.vx); } if (m.z > bz) { m.z = bz; m.vz = Math.min(0, m.vz); } if (m.z < -bz) { m.z = -bz; m.vz = Math.max(0, m.vz); }
+    }
+    /* magnet–magnet collisions (circle chains) */
+    for (let i = 0; i < MAGS.length; i++) for (let j = i + 1; j < MAGS.length; j++) {
+      const a = MAGS[i], b = MAGS[j]; if (!a.phys || !b.phys || !a.g.visible || !b.g.visible) continue; if (Math.hypot(a.x - b.x, a.z - b.z) > 9) continue;
+      a.worldCircles(_wc1); b.worldCircles(_wc2); let ma = (a.fixed || a.dragged) ? 0 : 1, mb = (b.fixed || b.dragged) ? 0 : 1; if (a.lockX && !a.fixed) ma = ma; 
+      for (const ca of _wc1) for (const cb of _wc2) {
+        const dx = cb[0] - ca[0], dz = cb[1] - ca[1], d = Math.hypot(dx, dz) || 1e-3, pen = ca[2] + cb[2] - d; if (pen <= 0) continue; const tot = ma + mb; if (!tot) continue;
+        let nx = dx / d, nz = dz / d; if (a.lockZ || b.lockZ) { /* keep sliding magnets on their rail */ } 
+        const pa = pen * ma / tot, pb = pen * mb / tot; if (!a.lockX) a.x -= nx * pa; if (!a.lockZ) a.z -= nz * pa; if (!b.lockX) b.x += nx * pb; if (!b.lockZ) b.z += nz * pb;
+        const rv = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz; if (rv < 0) { const jn = -rv * .9 / tot; a.vx -= nx * jn * ma; a.vz -= nz * jn * ma; b.vx += nx * jn * mb; b.vz += nz * jn * mb; }
+      }
+    }
+    physItems(h, opt);
+  }
+  for (const m of MAGS) m.sync();
+  for (const it of ITEMS) it.sync();
+}
+function physItems(h, opt) {
+  for (const it of ITEMS) {
+    if (it.dragged) { it.vx = it.vz = 0; continue; }
+    if (it.host) { it.host.toWorld(it.loc.x, it.loc.z, _t1); it.x = _t1.x; it.z = _t1.z; it.ang = it.host.ang + it.aoff; it.vx = it.vz = 0; if (it.host.qs < .05 && it.host.em) { it.host = null; it.vx = (Math.random() - .5) * 2; it.vz = (Math.random() - .5) * 2 + 1; } continue; }
+    let fsum = 0;
+    if (it.s > 0) {
+      for (const m of MAGS) { if (!m.g.visible) continue; for (const p of m.wp) {
+        const dx = p.x - it.x, dz = p.z - it.z, d = Math.hypot(dx, dz) || 1e-3, f = KI * Math.abs(p.q) * it.s / (d * d + EPS * EPS), ff = Math.min(f, 40);
+        it.vx += ff * dx / d * h; it.vz += ff * dz / d * h; fsum += ff;
+      } }
+    }
+    const dmp = Math.exp(-2.6 * h); it.vx *= dmp; it.vz *= dmp; const sp = Math.hypot(it.vx, it.vz); if (sp > 14) { it.vx *= 14 / sp; it.vz *= 14 / sp; } if (sp < .05 && fsum < .4) { it.vx = it.vz = 0; }
+    it.x += it.vx * h; it.z += it.vz * h; const bx = (opt.bx || TB.x) - 1, bz = (opt.bz || TB.z) - 1; it.x = clamp(it.x, -bx, bx); it.z = clamp(it.z, -bz, bz);
+    for (const m of MAGS) {   /* items cannot sink into magnets */
+      if (!m.g.visible) continue; m.worldCircles(_wc1); for (const c of _wc1) { const dx = it.x - c[0], dz = it.z - c[1], d = Math.hypot(dx, dz) || 1e-3, mn = c[2] + it.r * .55; if (d < mn) { it.x += dx / d * (mn - d); it.z += dz / d * (mn - d); const vn = it.vx * dx / d + it.vz * dz / d; if (vn < 0) { it.vx -= vn * dx / d; it.vz -= vn * dz / d; } } }
+    }
+    if (it.s > 0 && !it.noStick) {
+      for (const m of MAGS) { if (!m.g.visible || (m.qs < .12)) continue; for (const p of m.wp) { if (Math.hypot(p.x - it.x, p.z - it.z) < 1.5 + (it.r - .5) * .6) { it.host = m; m.toLocal(it.x, it.z, it.loc); it.aoff = it.ang - m.ang; it.vx = it.vz = 0; if (it.onStick) it.onStick(m); break; } } if (it.host) break; }
+    }
+  }
+}
+
+/* ---------- camera / picking ---------- */
+const CAM = { t: null, d: 30, yaw: 0, pitch: .95, g: null, f: 1, auto: false, preset: null, min: 6, max: 70 };
+function camGo(p, instant) {
+  CAM.g.t.set(p.t[0], p.t[1], p.t[2]); CAM.g.d = p.d; CAM.g.yaw = p.yaw; CAM.g.pitch = p.pitch; CAM.preset = p;
+  if (instant) { CAM.t.copy(CAM.g.t); CAM.d = p.d; CAM.yaw = p.yaw; CAM.pitch = p.pitch; }
+}
+function camUpdate(dt) {
+  if (CAM.auto) { CAM.g.yaw = .35 * Math.sin(performance.now() / 1000 * .12); }
+  const k = 1 - Math.exp(-dt * 3.2);
+  CAM.t.lerp(CAM.g.t, k); CAM.d += (CAM.g.d - CAM.d) * k; CAM.yaw += (CAM.g.yaw - CAM.yaw) * k; CAM.pitch += (CAM.g.pitch - CAM.pitch) * k;
+  const cp = Math.cos(CAM.pitch), D = CAM.d * CAM.f;
+  camera.position.set(CAM.t.x + D * Math.sin(CAM.yaw) * cp, CAM.t.y + D * Math.sin(CAM.pitch), CAM.t.z + D * Math.cos(CAM.yaw) * cp); camera.lookAt(CAM.t);
+}
+const DRAG = { body: null, tx: 0, tz: 0, ox: 0, oz: 0 };
+const _ray = new THREE.Raycaster(), _pl = new THREE.Plane(new THREE.Vector3(0, 1, 0), -MAGY), _v2 = new THREE.Vector2(), _hit = new THREE.Vector3();
+function groundPoint(cx, cy, y) {
+  _v2.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); _ray.setFromCamera(_v2, camera); _pl.constant = -(y === undefined ? MAGY : y); return _ray.ray.intersectPlane(_pl, _hit) ? _hit : null;
+}
+const SEL = { b: null };
+function select(b) { SEL.b = b; if (typeof Stage !== 'undefined' && Stage.cur && Stage.cur.onSelect) Stage.cur.onSelect(b); }
+function bodiesAll() { const a = []; for (const m of MAGS) if (m.g.visible && !m.noDrag) a.push(m); for (const i of ITEMS) if (!i.noDrag && i.g.visible) a.push(i); for (const c of COMP) if (!c.noDrag) a.push(c); if (Stage.cur && Stage.cur.extraBodies) for (const e of Stage.cur.extraBodies()) a.push(e); return a; }
+function pickBody(x, z) {
+  let best = null, bd = 1e9; const tmp = [];
+  for (const b of bodiesAll()) {
+    if (b.isMag) { b.worldCircles(tmp); for (const c of tmp) { const d = Math.hypot(x - c[0], z - c[1]) - c[2]; if (d < .35 && d < bd) { bd = d; best = b; } } }
+    else { const d = Math.hypot(x - b.x, z - b.z) - b.r; if (d < .45 && d < bd) { bd = d; best = b; } }
+  }
+  return best;
+}
+function startDrag(b, p) {
+  if (b.beforeDrag && b.beforeDrag() === false) return false;
+  DRAG.body = b; DRAG.ox = b.x - p.x; DRAG.oz = b.z - p.z; DRAG.tx = b.x; DRAG.tz = b.z; b.dragged = true; if (b.isItem && b.host) { b.host = null; } if (b.tang !== undefined) b.tang = undefined; select(b); return true;
+}
+function endDrag() { const b = DRAG.body; if (b) { b.dragged = false; if (b.vx !== undefined) { b.vx = b.vz = 0; } if (b.afterDrag) b.afterDrag(); } DRAG.body = null; }
+function updDrag(dt) {
+  const b = DRAG.body; if (!b) return;
+  const lx = b.isMag && b.lockX, lz = b.isMag && b.lockZ; const bx = b.limX || TB.x - 1.5, bz = b.limZ || TB.z - 1.2;
+  let tx = clamp(DRAG.tx, -bx, bx), tz = clamp(DRAG.tz, -bz, bz); if (b.rail) { const r = b.rail(tx, tz); tx = r[0]; tz = r[1]; }
+  const k = 1 - Math.exp(-dt * 22); if (!lx) b.x += (tx - b.x) * k; if (!lz) b.z += (tz - b.z) * k; if (b.sync) b.sync();
+}
+function initCamera() {
+  const cv = $('#gl'), ptrs = new Map(); let last = 0, moved = 0;
+  cv.addEventListener('pointerdown', e => {
+    cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = 0; CAM.auto = false;
+    if (ptrs.size === 2) { endDrag(); const a = [...ptrs.values()]; last = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); return; }
+    if (ptrs.size === 1 && W.mode !== 'title') { const p = groundPoint(e.clientX, e.clientY); if (p) { const b = pickBody(p.x, p.z); if (b) { if (startDrag(b, p)) { cv.style.cursor = 'grabbing'; return; } } else if (Stage.cur && Stage.cur.onGround) Stage.cur.onGround(p); } }
+  });
+  cv.addEventListener('pointermove', e => {
+    const p = ptrs.get(e.pointerId);
+    if (!p) { if (W.mode !== 'title' && !DRAG.body) { const g = groundPoint(e.clientX, e.clientY); cv.style.cursor = g && pickBody(g.x, g.z) ? 'grab' : 'default'; } return; }
+    const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; moved += Math.abs(dx) + Math.abs(dy);
+    if (DRAG.body && ptrs.size === 1) { const g = groundPoint(e.clientX, e.clientY, DRAG.body.isMag ? MAGY : .3); if (g) { DRAG.tx = g.x + DRAG.ox; DRAG.tz = g.z + DRAG.oz; } return; }
+    if (ptrs.size === 1) { CAM.g.yaw -= dx * .0065; CAM.g.pitch = clamp(CAM.g.pitch + dy * .0055, .12, 1.52); CAM.yaw = CAM.g.yaw; CAM.pitch = CAM.g.pitch; }
+    else if (ptrs.size === 2) { const a = [...ptrs.values()], d = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); if (last) { CAM.g.d = clamp(CAM.g.d * last / d, CAM.min, CAM.max); CAM.d = CAM.g.d; } last = d; }
+  });
+  const up = e => { ptrs.delete(e.pointerId); last = 0; if (ptrs.size === 0) { if (DRAG.body) { endDrag(); cv.style.cursor = 'default'; } else if (moved < 8 && W.mode !== 'title') select(null); } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); last = 0; endDrag(); });
+  cv.addEventListener('wheel', e => { e.preventDefault(); CAM.g.d = clamp(CAM.g.d * Math.exp(e.deltaY * .0012), CAM.min, CAM.max); }, { passive: false });
+  cv.addEventListener('keydown', e => {
+    const k = e.key; let h = true;
+    if (k === 'ArrowLeft') CAM.g.yaw += .12; else if (k === 'ArrowRight') CAM.g.yaw -= .12; else if (k === 'ArrowUp') CAM.g.pitch = clamp(CAM.g.pitch - .08, .12, 1.52); else if (k === 'ArrowDown') CAM.g.pitch = clamp(CAM.g.pitch + .08, .12, 1.52);
+    else if (k === '+' || k === '=') CAM.g.d = clamp(CAM.g.d * .85, CAM.min, CAM.max); else if (k === '-') CAM.g.d = clamp(CAM.g.d * 1.18, CAM.min, CAM.max); else h = false;
+    if (h) { e.preventDefault(); CAM.auto = false; }
+  });
+}
+function zoomBy(f) { CAM.g.d = clamp(CAM.g.d * f, CAM.min, CAM.max); CAM.auto = false; }
+function rotateSel(d) { const b = SEL.b; if (!b || b.rotateBy === undefined) { toast('Tap a magnet first, then rotate it.', null, null, 1800); return; } if (b.lockRot && !b.userRot) { toast('This magnet is fixed in place for this experiment.', null, null, 1800); return; } b.rotateBy(d); }
+
+/* ---------- labels (DOM, tied to 3D positions) ---------- */
+const LBL = { list: [], byId: {} };
+function addLabel(id, text, posFn, modes, opt) {
+  opt = opt || {}; const el = document.createElement('button'); el.className = 'lbl' + (opt.cls ? ' ' + opt.cls : ''); el.textContent = text; el.setAttribute('aria-label', opt.aria || text); el.tabIndex = -1;
+  if (opt.click) el.addEventListener('click', e => { e.stopPropagation(); opt.click(); });
+  $('#labels').appendChild(el);
+  const L = { id, el, posFn: typeof posFn === 'function' ? posFn : () => posFn, modes, always: !!opt.always, v: new THREE.Vector3(), on: true }; LBL.list.push(L); LBL.byId[id] = L; return L;
+}
+function updateLabels() {
+  const g = W.mode, w = innerWidth, h = innerHeight;
+  for (const L of LBL.list) {
+    const show = L.on && L.modes.includes(g) && (W.labels || L.always);
+    if (!show) { if (L.shown) { L.el.style.display = 'none'; L.shown = false; } continue; }
+    L.v.copy(L.posFn()).project(camera);
+    if (L.v.z > 1 || Math.abs(L.v.x) > 1.1 || Math.abs(L.v.y) > 1.1) { if (L.shown) { L.el.style.display = 'none'; L.shown = false; } continue; }
+    if (!L.shown) { L.el.style.display = 'block'; L.shown = true; }
+    const sx = (L.v.x * .5 + .5) * w, sy = (-L.v.y * .5 + .5) * h;
+    L.el.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) translate(-50%,-120%)`;
+  }
+}
+function clearLabels(prefix) { LBL.list = LBL.list.filter(L => { if (!prefix || L.id.startsWith(prefix)) { L.el.remove(); delete LBL.byId[L.id]; return false; } return true; }); }
+
+/* ---------- renderer / scene init ---------- */
+function resize() {
+  if (!renderer) return;
+  const w = innerWidth, h = innerHeight, pr = W.gfx === 'low' ? Math.min(devicePixelRatio || 1, 1.15) : Math.min(devicePixelRatio || 1, 2);
+  renderer.setPixelRatio(pr); renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = 42; CAM.f = clamp(1.35 / (w / h), 1, 2.3); camera.updateProjectionMatrix(); applyViewOffset();
+}
+function applyViewOffset() {
+  if (!camera) return; const w = innerWidth, h = innerHeight, P = typeof UI !== 'undefined' && UI.panel, show = P && P.classList.contains('show') && !W.present;
+  let sx = 0, sy = 0;
+  if (show) { const r = P.getBoundingClientRect(); if (r.left > w * .35) sx = (w - r.left) / 2; else sy = clamp((h - r.top) * .5, 0, h * .36); }
+  if (W.mode === 'title') sy = -h * (w / h > 1 ? .3 : .2);
+  if (sx || sy) camera.setViewOffset(w, h, sx, sy, w, h); else camera.clearViewOffset();
+  camera.updateProjectionMatrix();
+}
+function initWorld() {
+  const cv = $('#gl');
+  renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'high-performance' }); renderer.setClearColor(0x050d1f, 1);
+  scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x050d1f, .0085);
+  camera = new THREE.PerspectiveCamera(42, 1, .1, 400); clock = new THREE.Clock();
+  CAM.t = new THREE.Vector3(); CAM.g = { t: new THREE.Vector3() };
+  initMats();
+  scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x203a66, .55)); scene.add(new THREE.AmbientLight(0x9fb8e0, .6)); const dl = new THREE.DirectionalLight(0xffffff, .95); dl.position.set(8, 18, 10); scene.add(dl); const pl = new THREE.PointLight(0x35b8ff, .9, 80); pl.position.set(-10, 10, -12); scene.add(pl); const pl2 = new THREE.PointLight(0xff5a6a, .35, 60); pl2.position.set(12, 8, 8); scene.add(pl2);
+  /* lab bench */
+  tableG = new THREE.Group(); scene.add(tableG);
+  const tc = document.createElement('canvas'); tc.width = 1024; tc.height = 648; const x = tc.getContext('2d'); const gr = x.createLinearGradient(0, 0, 0, 648); gr.addColorStop(0, '#12305e'); gr.addColorStop(1, '#0a1e40'); x.fillStyle = gr; x.fillRect(0, 0, 1024, 648);
+  x.strokeStyle = 'rgba(90,200,255,.22)'; x.lineWidth = 2; for (let i = 0; i <= 30; i++) { const px = i / 30 * 1024; x.beginPath(); x.moveTo(px, 0); x.lineTo(px, 648); x.stroke(); } for (let j = 0; j <= 19; j++) { const py = j / 19 * 648; x.beginPath(); x.moveTo(0, py); x.lineTo(1024, py); x.stroke(); }
+  x.strokeStyle = 'rgba(90,200,255,.6)'; x.lineWidth = 5; x.strokeRect(3, 3, 1018, 642);
+  const ttx = new THREE.CanvasTexture(tc); ttx.anisotropy = 4;
+  tableMesh = new THREE.Mesh(new THREE.BoxGeometry(TB.x * 2, 1, TB.z * 2), [M.dark, M.dark, new THREE.MeshStandardMaterial({ map: ttx, metalness: .2, roughness: .7 }), M.dark, M.dark, M.dark]); tableMesh.position.y = -.5; tableG.add(tableMesh);
+  const eg = new THREE.LineSegments(new THREE.EdgesGeometry(tableMesh.geometry), new THREE.LineBasicMaterial({ color: 0x35d4ff, transparent: true, opacity: .8 })); eg.position.y = -.5; tableG.add(eg);
+  /* soft glow floor + ambient dust */
+  floorG = new THREE.Mesh(new THREE.PlaneGeometry(220, 220), new THREE.MeshBasicMaterial({ map: (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); const r = g.createRadialGradient(128, 128, 10, 128, 128, 128); r.addColorStop(0, 'rgba(30,110,200,.5)'); r.addColorStop(1, 'rgba(5,13,31,0)'); g.fillStyle = r; g.fillRect(0, 0, 256, 256); return new THREE.CanvasTexture(c); })(), transparent: true, depthWrite: false }));
+  floorG.rotation.x = -Math.PI / 2; floorG.position.y = -1.6; scene.add(floorG);
+  const N = 260, bp = new Float32Array(N * 3); for (let i = 0; i < N; i++) { const r = 30 + rnd() * 50, a = rnd() * 6.283, y = (rnd() - .3) * 30; bp[i * 3] = Math.cos(a) * r; bp[i * 3 + 1] = y; bp[i * 3 + 2] = Math.sin(a) * r; }
+  const bgG = new THREE.BufferGeometry(); bgG.setAttribute('position', new THREE.BufferAttribute(bp, 3)); bgPts = new THREE.Points(bgG, new THREE.PointsMaterial({ size: 1.1, map: glowTex('rgba(160,230,255,1)', 'rgba(60,160,255,.4)'), transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false })); scene.add(bgPts);
+  /* selection ring */
+  selRing = new THREE.Mesh(new THREE.RingGeometry(.9, 1, 48), new THREE.MeshBasicMaterial({ color: 0x35d4ff, transparent: true, opacity: .85, side: THREE.DoubleSide, depthWrite: false })); selRing.rotation.x = -Math.PI / 2; selRing.visible = false; selRing.renderOrder = 4; scene.add(selRing);
+  initCamera(); window.addEventListener('resize', resize); resize();
+}
+function updSel(dt) {
+  const b = SEL.b; if (!b || !b.g || !b.g.visible || (b.dead)) { selRing.visible = false; return; }
+  selRing.visible = true; const r = (b.selR || 2) * (1 + .03 * Math.sin(T * 5)); selRing.scale.set(r, r, 1); selRing.position.set(b.x, (b.isMag ? b.gy : (b.y || 0)) + .05, b.z);
+}
+
+/* =====================================================================
+   STAGES (part 1): framework, title, lab, poles, field, filings
+   ===================================================================== */
+const btn = (a, l, c, x) => `<button class="btn ${c || ''}" data-act="${a}" ${x || ''}>${l}</button>`;
+const sliderH = (id, label, val, min, max, step, shown) => `<div class="ctl"><label for="${id}">${label}<span id="${id}v" class="pill">${shown}</span></label><input type="range" id="${id}" data-in="${id}" min="${min}" max="${max}" step="${step || 1}" value="${val}"></div>`;
+let FV, FVg, FIL = null, G = null;
+
+const Stage = {
+  cur: null, id: null, list: {},
+  enter(id) {
+    if (this.cur) this.cleanup();
+    const s = this.list[id]; this.cur = s; this.id = id; W.mode = id; SEL.b = null; DRAG.body = null;
+    G = new THREE.Group(); scene.add(G); s.G = G;
+    tableG.visible = s.table !== false; floorG.visible = true; FV.setVisible(false); FVg.setVisible(false);
+    camGo(s.cam, false); CAM.auto = !!s.auto; CAM.min = s.min || 6; CAM.max = s.max || 70;
+    s.enter();
+  },
+  cleanup() {
+    const s = this.cur; if (s.exit) s.exit();
+    clearMags(); clearItems(); while (COMP.length) COMP.pop().dispose(); clearLabels('');
+    if (FIL) { FIL.clear(); FIL.mesh.visible = false; }
+    if (G) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); }); G = null; }
+    FV.setVisible(false); FVg.setVisible(false); selRing.visible = false; SEL.b = null; DRAG.body = null;
+  },
+  update(dt, raw) {
+    const s = this.cur; if (!s) return;
+    if (s.phys) physStep(Math.min(dt, .05), s.physOpt);
+    updDrag(raw);
+    if (COMP.length) { polesAll(PL); for (const c of COMP) c.bl = c.update(dt, PL, _o); }
+    if (s.update) s.update(dt, raw);
+    if (FV.show) { FV.tick(dt); } if (FVg.show) FVg.tick(dt);
+    updSel(dt);
+  }
+};
+function initStages() { FV = new FieldViz(W.gfx === 'low' ? 30 : 64, 150); FVg = new FieldViz(40, 160, { scale: 1.3 }); FV.setVisible(false); FVg.setVisible(false); }
+
+/* ---------- TITLE ---------- */
+Stage.list.title = {
+  cam: { t: [0, 1.2, 0], d: 21, yaw: 0, pitch: .3 }, auto: true, table: false, phys: false,
+  enter() {
+    this.A = new Mag('bar', { x: -3.4, z: 0, gy: 1.8, fixed: true, phys: false, noDrag: true, labels: false }); this.B = new Mag('bar', { x: 5, z: 0, gy: 1.8, fixed: true, phys: false, noDrag: true, labels: false });
+    MAGS.push(this.A, this.B); this.A.g.scale.setScalar(1.15); this.B.g.scale.setScalar(1.15);
+    const c = new Compass({ x: 0, z: 5.2, y: -.3, scale: 1.1, noDrag: true }); COMP.push(c);
+    const n = W.gfx === 'low' ? 110 : 240; this.pp = new Float32Array(n * 3); this.pn = n; for (let i = 0; i < n; i++)this.respawn(i, true);
+    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(this.pp, 3).setUsage(35048));
+    this.pts = new THREE.Points(pg, new THREE.PointsMaterial({ size: .26, color: 0xcfe6ff, map: glowTex('rgba(255,255,255,1)', 'rgba(170,200,255,.5)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); this.pts.frustumCulled = false; G.add(this.pts);
+    FV.setVisible(true); this.t0 = 0; this.tg = 0;
+  },
+  respawn(i, any) { const a = Math.random() * 6.28, r = 3 + Math.random() * (any ? 9 : 1); this.pp[i * 3] = (any ? 0 : 1.5) + Math.cos(a) * r; this.pp[i * 3 + 1] = 1.8 + (Math.random() - .5) * 6; this.pp[i * 3 + 2] = Math.sin(a) * r * .8; },
+  update(dt) {
+    this.t0 += dt; const A = this.A, B = this.B, t = this.t0;
+    B.x = 5.4 + 2.6 * Math.sin(t * .55); A.ang = .12 * Math.sin(t * .4); const tg = Math.sin(t * .09 + 1.2) > .55 ? Math.PI : 0; B.ang += (tg - B.ang) * Math.min(1, dt * 1.6); A.sync(); B.sync();
+    A.g.position.y = 1.8 + .12 * Math.sin(t * 1.1); B.g.position.y = 1.8 + .12 * Math.sin(t * 1.1 + 1);
+    polesAll(PL); this.tg += dt; FV.update(PL, { d3: true, n: W.gfx === 'low' ? 14 : 26, step: .24, R: 24 });
+    const B3 = _o, pp = this.pp;
+    for (let i = 0; i < this.pn; i++) {
+      fieldAt(pp[i * 3], pp[i * 3 + 1], pp[i * 3 + 2], PL, B3); const l = Math.hypot(B3.x, B3.y, B3.z) || 1e-6, sp = clamp(l * 60, .4, 4.5);
+      pp[i * 3] += B3.x / l * sp * dt; pp[i * 3 + 1] += B3.y / l * sp * dt; pp[i * 3 + 2] += B3.z / l * sp * dt;
+      let bad = pp[i * 3] * pp[i * 3] + pp[i * 3 + 2] * pp[i * 3 + 2] > 400; for (const p of PL) if (p.q < 0 && Math.hypot(pp[i * 3] - p.x, pp[i * 3 + 1] - p.y, pp[i * 3 + 2] - p.z) < .6) bad = true;
+      if (bad) { const p = PL.filter(q => q.q > 0)[Math.floor(Math.random() * 2) % Math.max(1, PL.filter(q => q.q > 0).length)]; if (p) { pp[i * 3] = p.x + (Math.random() - .5) * 1.5; pp[i * 3 + 1] = p.y + (Math.random() - .5) * 1.5; pp[i * 3 + 2] = p.z + (Math.random() - .5) * 1.5; } else this.respawn(i, true); }
+    }
+    this.pts.geometry.attributes.position.needsUpdate = true;
+  },
+  panel() { return ''; }
+};
+
+/* ---------- LAB ---------- */
+Stage.list.lab = {
+  cam: { t: [0, 0, 0], d: 30, yaw: 0, pitch: .98 }, phys: true, lines: false, comp: true,
+  enter() { this.spawn(); FV.setVisible(this.lines); UI.render(); },
+  spawn() {
+    clearMags(); clearItems(); while (COMP.length) COMP.pop().dispose(); SEL.b = null;
+    const A = new Mag('bar', { x: -8, z: -3, ang: 0, name: 'Bar magnet 1' }), B = new Mag('bar', { x: 7, z: -3, ang: Math.PI, name: 'Bar magnet 2' }), H = new Mag('horseshoe', { x: 0, z: -6.4, ang: 0, name: 'Horseshoe magnet' });
+    MAGS.push(A, B, H);
+    [[-10, 6.6, 'nail'], [-6, 6.9, 'wood'], [-2.6, 6.6, 'copper'], [1, 6.7, 'plastic'], [5, 6.2, 'clip'], [6.6, 7.3, 'clip'], [8.2, 6, 'clip'], [9.8, 7.1, 'clip'], [11.4, 6.1, 'clip']].forEach(a => new Item(a[2], a[0], a[1], { ang: Math.random() * 3 }));
+    if (this.comp) COMP.push(new Compass({ x: -1, z: 2.2 }));
+  },
+  onSelect() { this.stat(true); },
+  stat(force) {
+    const el = $('#labInfo'); if (!el) return; const b = SEL.b; let h;
+    if (!b) h = 'Tap or drag any object. <b>Selected:</b> nothing yet.';
+    else if (b.isMag) h = `<b>${b.name}</b> – red end = <b style="color:#ff7a88">North pole (N)</b>, blue end = <b style="color:#7aa8ff">South pole (S)</b>. Use the buttons (or Q / E keys) to rotate or flip it.`;
+    else if (b.isCompass) h = '<b>Compass</b> – a tiny magnet on a pivot. Its red end points along the local magnetic field (to Earth’s north when no magnet is close).';
+    else h = `<b>${b.name}</b> – ${b.s > 0 ? 'made of a <b>magnetic material</b>: a magnet attracts it.' : 'not a magnetic material: a magnet does not attract it.'}`;
+    el.innerHTML = h;
+  },
+  update(dt) {
+    this.tm = (this.tm || 0) + dt; if (this.tm > .25) {
+      this.tm = 0; const el = $('#labPair'); if (el) {
+        let best = null, bd = 99; for (let i = 0; i < MAGS.length; i++) for (let j = i + 1; j < MAGS.length; j++) { MAGS[i].updWorld(); MAGS[j].updWorld(); for (const pa of MAGS[i].wp) for (const pb of MAGS[j].wp) { const d = Math.hypot(pa.x - pb.x, pa.z - pb.z); if (d < bd) { bd = d; best = [pa, pb]; } } }
+        if (!best || bd > 7) el.innerHTML = '🧲 The magnets are far apart, so the push or pull is very weak. Drag them closer!';
+        else { const same = best[0].q * best[1].q > 0, nm = p => (p.q > 0 ? 'N' : 'S'); el.innerHTML = `${same ? '↔️ <b>Repel</b>' : '🤝 <b>Attract</b>'}: the ${nm(best[0])} pole of <i>${best[0].m.name}</i> is near the ${nm(best[1])} pole of <i>${best[1].m.name}</i> (${bd.toFixed(1)} cm). ${same ? 'Like poles push apart.' : 'Unlike poles pull together.'}`; }
+      }
+    }
+    if (this.lines) { polesAll(PL); FV.update(PL, { n: W.gfx === 'low' ? 14 : 24, y: MAGY + .02 }); }
+  },
+  act(k, v) {
+    if (k === 'rot') rotateSel(v === '+' ? Math.PI / 4 : v === '-' ? -Math.PI / 4 : Math.PI);
+    else if (k === 'kind') { const b = SEL.b; if (b && b.isMag) { b.setKind(v); b.name = v === 'bar' ? 'Bar magnet' : 'Horseshoe magnet'; this.stat(); } else toast('Tap a magnet first, then choose its type.', null, null, 2000); }
+    else if (k === 'lines') { this.lines = !this.lines; FV.setVisible(this.lines); UI.render(); }
+    else if (k === 'comp') { this.comp = !this.comp; while (COMP.length) COMP.pop().dispose(); if (this.comp) COMP.push(new Compass({ x: -1, z: 2.2 })); UI.render(); }
+    else if (k === 'reset') { this.spawn(); UI.render(); toast('Laboratory reset.', null, null, 1500); }
+  },
+  panel() {
+    return `<div class="kick">Magnetic Laboratory</div><h3>Your virtual lab</h3>
+    <p>Drag magnets and objects across the bench. Drag empty space to turn the view; scroll or pinch to zoom.</p>
+    <div class="box an" id="labInfo"></div><div class="box fact" id="labPair" aria-live="polite"></div>
+    <div class="row">${btn('rot:-', '⟲ Rotate', 'sm')}${btn('rot:+', '⟳ Rotate', 'sm')}${btn('rot:f', '⇄ Flip', 'sm')}</div>
+    <div class="row"><span class="pill">Selected magnet type:</span>${btn('kind:bar', 'Bar', 'sm')}${btn('kind:horseshoe', 'Horseshoe', 'sm')}</div>
+    <div class="row">${btn('lines', (this.lines ? '☑' : '☐') + ' Field lines', 'sm' + (this.lines ? ' on' : ''))}${btn('comp', (this.comp ? '☑' : '☐') + ' Compass', 'sm' + (this.comp ? ' on' : ''))}${btn('reset', '↺ Reset lab', 'sm')}</div>
+    <div class="box nt"><b>Remember: </b>a magnet only attracts <i>magnetic materials</i> (like iron and steel). Wood, copper and plastic are not attracted. Distances are in “cm” for learning only.</div>`;
+  },
+  afterRender() { this.stat(); }
+};
+
+/* ---------- POLES ---------- */
+const CFG = { NN: [0, Math.PI, 'N–N'], SS: [Math.PI, 0, 'S–S'], NS: [0, 0, 'N–S'], SN: [Math.PI, Math.PI, 'S–N'] };
+Stage.list.poles = {
+  cam: { t: [0, 0, 0], d: 25, yaw: 0, pitch: 1.0 }, phys: true, physOpt: { bx: 17 },
+  st: 'pick', cfg: null, pred: null, score: store.get('pscore', [0, 0]), t: 0, hide: false,
+  enter() { this.st = 'pick'; this.cfg = null; this.arrow(); this.setup('NS', true); UI.render(); },
+  arrow() { if (this.arr) { this.arr.forEach(a => G.remove(a)); } this.arr = []; },
+  setup(k, keep) {
+    clearMags(); this.arrow(); const c = CFG[k]; this.cfg = k; this.pred = null; this.res = null;
+    this.A = new Mag('bar', { x: -5.6, z: 0, ang: c[0], fixed: true, name: 'Magnet A' }); this.B = new Mag('bar', { x: 5.6, z: 0, ang: c[1], fixed: true, lockZ: true, lockRot: true, name: 'Magnet B' });
+    MAGS.push(this.A, this.B); [this.A, this.B].forEach(m => { m.showLabels(!this.hide, 1.9); m.noDrag = true; }); this.st = 'predict'; this.t = 0;
+  },
+  same() { return CFG[this.cfg][2][0] === CFG[this.cfg][2][2]; },
+  release() { this.B.fixed = false; this.st = 'run'; this.t = 0; this.arr = [0, 1].map(i => { const a = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 2.4, 0), 2, 0x46e08f, .8, .55); G.add(a); return a; }); UI.render(); },
+  update(dt) {
+    if (this.st === 'run' || this.st === 'done') {
+      const ms = [this.A, this.B]; this.arr.forEach((a, i) => { const m = ms[i], f = m.fx, dir = f >= 0 ? 1 : -1, L = 1.2 + Math.min(2.6, Math.abs(f) * .5); a.setDirection(new THREE.Vector3(dir, 0, 0)); a.setLength(L, .8, .55); const side = i === 0 ? (this.A.ang === 0 ? 3.1 : -3.1) : (this.B.ang === 0 ? -3.1 : 3.1); a.position.set(m.x + side - dir * L * .5 * 0, 2.4, 0); a.setColor(this.same() ? 0xff8a7a : 0x46e08f); });
+    }
+    if (this.st === 'run') { this.t += dt; if (this.t > 2.8) { this.st = 'done'; const ok = this.pred === (this.same() ? 'repel' : 'attract'); this.res = ok; this.score[1]++; if (ok) this.score[0]++; store.set('pscore', this.score); UI.render(); } }
+  },
+  act(k, v) {
+    if (k === 'cfg') { this.hide = false; this.setup(v); UI.render(); }
+    else if (k === 'rand') { this.hide = true; this.setup(pick(Object.keys(CFG))); UI.render(); toast('Random challenge: the pole letters are hidden. Red = North, blue = South.', null, null, 3000); }
+    else if (k === 'pred') { this.pred = v; this.st = 'ready'; UI.render(); }
+    else if (k === 'release') this.release();
+    else if (k === 'reset') { this.setup(this.cfg || 'NS'); UI.render(); }
+  },
+  panel() {
+    const c = this.cfg ? CFG[this.cfg][2] : '', S = this.st;
+    let h = `<div class="kick">The Rule of Two Poles</div><h3>Like poles repel, unlike poles attract</h3>
+    <p>Choose which two poles face each other. Magnet A is held still. Magnet B slides along the bench.</p><div class="row">${Object.keys(CFG).map(k => btn('cfg:' + k, CFG[k][2], 'sm' + (this.cfg === k ? ' on' : ''))).join('')}${btn('rand', '🎲 Random challenge', 'sm')}</div>`;
+    if (S === 'predict') h += `<div class="box an"><b>Predict first!</b> The facing poles are <b>${c}</b>. What will happen when you let go?</div><div class="row">${btn('pred:attract', '🤝 Attract', 'pri')}${btn('pred:repel', '↔️ Repel', 'pri')}${btn('pred:nothing', '😐 Nothing')}</div>`;
+    else if (S === 'ready') h += `<div class="box an">You predicted: <b>${this.pred}</b>. Ready?</div><div class="row">${btn('release', '▶ Release magnets', 'pri')}</div>`;
+    else if (S === 'run') h += '<div class="box an">Watch carefully… the arrows show the push or pull on each magnet.</div>';
+    else if (S === 'done') { const rep = this.same(); h += `<div class="box ${this.res ? 'fact' : 'nt'}"><b>${this.res ? '✔ Correct!' : '✖ Not this time.'}</b> They <b>${rep ? 'repelled' : 'attracted'}</b>. ${rep ? `Facing poles were the same (${c}) – <b>like poles repel</b>.` : `Facing poles were different (${c}) – <b>unlike poles attract</b>.`}</div><div class="box">Magnetic poles always come in pairs: if you cut a magnet in two, each piece gets its own N and S. Magnet poles are <i>not</i> the same thing as + and − electric charges.</div><div class="row">${btn('reset', '↺ Reset arrangement', 'sm')}${btn('rand', '🎲 Random challenge', 'sm pri')}</div>`; }
+    h += `<div class="row"><span class="pill">Score: ${this.score[0]} / ${this.score[1]}</span>${S !== 'predict' ? btn('reset', '↺ Reset arrangement', 'sm') : ''}</div>`; return h;
+  }
+};
+
+/* ---------- FIELD EXPLORER ---------- */
+Stage.list.field = {
+  cam: { t: [0, 1.4, 0], d: 24, yaw: .5, pitch: .5 }, table: false, phys: false, n: 18, view: '3d', lines: true,
+  enter() {
+    this.M = new Mag('bar', { x: 0, z: 0, gy: 1.2, fixed: true, name: 'Bar magnet' }); this.M.userRot = true; this.M.noDrag = true; MAGS.push(this.M);
+    this.pr = new Compass({ x: 4.5, z: 3, y: 1.2, scale: .8, earth: false }); COMP.push(this.pr);
+    this.pr.beforeDrag = () => true; this.view = '3d'; this.lines = true; FV.setVisible(true); this.mode3(); UI.render();
+  },
+  mode3() { this.view = '3d'; camGo({ t: [0, 1.4, 0], d: 24, yaw: .5, pitch: .5 }); },
+  update(dt) {
+    polesAll(PL); FV.setVisible(this.lines); const d3 = this.view === '3d'; FV.update(PL, { d3, n: this.n, y: MAGY + 1.2, step: .2 });
+    this.tm = (this.tm || 0) + dt; if (this.tm > .2) { this.tm = 0; const bl = this.pr.bl || 0, e = $('#fStr'); if (e) { const f = bl; e.innerHTML = `${levelName(f * 1)}`; $('#fBar').style.width = clamp(Math.log(f / .004) / 4.2, 0, 1) * 100 + '%'; } }
+  },
+  act(k, v) {
+    if (k === 'rot') { SEL.b = this.M; rotateSel(v === '+' ? Math.PI / 4 : v === '-' ? -Math.PI / 4 : Math.PI); }
+    else if (k === 'lines') { this.lines = !this.lines; UI.render(); }
+    else if (k === 'v3') { this.view = '3d'; camGo({ t: [0, 1.4, 0], d: 24, yaw: .5, pitch: .5 }); UI.render(); }
+    else if (k === 'v2') { this.view = '2d'; camGo({ t: [0, 1.2, 0], d: 24, yaw: 0, pitch: 1.5 }); UI.render(); }
+    else if (k === 'near') camGo({ t: [3, 1.2, 0], d: 9, yaw: .4, pitch: .5 });
+    else if (k === 'far') camGo({ t: [0, 1.2, 0], d: 46, yaw: .4, pitch: .6 });
+  },
+  input(k, v) { if (k === 'fn') { this.n = v; $('#fnv').textContent = v + ' lines'; } },
+  panel() {
+    return `<div class="kick">Field Explorer</div><h3>The magnetic field</h3>
+    <p>A magnet has an invisible <b>magnetic field</b> around it. Field lines are a <i>picture</i> that shows its shape. Outside the magnet they run from <b>N to S</b> (watch the moving dots).</p>
+    <div class="row">${btn('lines', (this.lines ? '☑' : '☐') + ' Field lines', 'sm' + (this.lines ? ' on' : ''))}${btn('v3', '🧊 3D view', 'sm' + (this.view === '3d' ? ' on' : ''))}${btn('v2', '⬇ Top-down 2D', 'sm' + (this.view === '2d' ? ' on' : ''))}</div>
+    ${sliderH('fn', 'Number of lines', this.n, 6, 40, 1, this.n + ' lines')}
+    <div class="row">${btn('rot:-', '⟲', 'sm', 'aria-label="Rotate magnet left"')}${btn('rot:+', '⟳', 'sm', 'aria-label="Rotate magnet right"')}${btn('near', '🔍 Near field', 'sm')}${btn('far', '🔭 Far field', 'sm')}</div>
+    <div class="box an"><b>Probe compass:</b> drag the small compass around. Field strength here: <b id="fStr">–</b><div class="bar"><i id="fBar" style="background:linear-gradient(90deg,#3b82ff,#35d4ff);width:30%"></i></div></div>
+    <div class="box fact"><b>Near the poles</b> the lines crowd together – the field is <b>strong</b>. <b>Far away</b> they spread out – the field is <b>weak</b>.</div>
+    <div class="box nt"><b>Careful: </b>field lines are a visual model, not real threads. The spacing and the number of lines are not an exact measurement.</div>`;
+  }
+};
+
+/* ---------- IRON FILINGS ---------- */
+Stage.list.filings = {
+  cam: { t: [0, 0, 0], d: 27, yaw: 0, pitch: 1.1 }, phys: true, cfg: 'bar',
+  enter() {
+    if (!FIL) FIL = new Filings(W.gfx === 'low' ? 1300 : 2800, 11, 6.8, 1.14); FIL.clear(); FIL.mesh.visible = true; FIL.pause = false;
+    const sh = new THREE.Mesh(new THREE.PlaneGeometry(22.6, 14.2), new THREE.MeshBasicMaterial({ color: 0x7fd6ff, transparent: true, opacity: .1, depthWrite: false, side: THREE.DoubleSide })); sh.rotation.x = -Math.PI / 2; sh.position.y = 1.1; G.add(sh);
+    const ed = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(22.6, .1, 14.2)), new THREE.LineBasicMaterial({ color: 0x9fe6ff })); ed.position.y = 1.1; G.add(ed);
+    this.setup(this.cfg); UI.render();
+  },
+  setup(c) {
+    clearMags(); this.cfg = c; const mk = (k, x, a) => { const m = new Mag(k, { x, z: 0, ang: a, fixed: true, noDrag: true, labels: true, lscale: .9 }); m.userRot = true; m.setLabelsAbove(MAGY + .75); MAGS.push(m); return m; };
+    if (c === 'bar') mk('bar', 0, 0); else if (c === 'horse') mk('horseshoe', -.6, 0); else if (c === 'unlike') { mk('bar', -5.6, 0); mk('bar', 5.6, 0); } else { mk('bar', -5.6, 0); mk('bar', 5.6, Math.PI); }
+    SEL.b = null; if (FIL) { FIL.tap = Math.max(FIL.tap, 0); }
+  },
+  update(dt) { polesAll(PL); FIL.update(dt, PL); if (FIL.tap > 0 && FIL.pause) FIL.tap = 0; this.tm = (this.tm || 0) + dt; if (this.tm > .5) { this.tm = 0; const e = $('#filN'); if (e) e.textContent = FIL.n; } },
+  act(k, v) {
+    if (k === 'cfg') { this.setup(v); FIL.clear(); UI.render(); }
+    else if (k === 'sprinkle') { FIL.clear(); FIL.add(W.gfx === 'low' ? 800 : 1700); FIL.tap = 10; FIL.pause = false; toast('Filings sprinkled. Watch them line up!', null, null, 1800); UI.render(); }
+    else if (k === 'tap') { FIL.tap = 6; FIL.pause = false; FIL.needLayout = true; }
+    else if (k === 'pause') { FIL.pause = !FIL.pause; UI.render(); }
+    else if (k === 'clear') { FIL.clear(); }
+    else if (k === 'more') { FIL.add(W.gfx === 'low' ? 250 : 600); FIL.tap = 3; }
+    else if (k === 'orient') { MAGS.forEach(m => m.rotateBy(Math.PI / 2)); FIL.needLayout = false; FIL.tap = 9; setTimeout(() => { if (FIL) FIL.needLayout = true; }, 700); }
+    else if (k === 'reset') { this.setup('bar'); FIL.clear(); FIL.pause = false; UI.render(); }
+  },
+  panel() {
+    const c = this.cfg;
+    return `<div class="kick">Iron Filings Experiment</div><h3>Reveal the pattern</h3>
+    <p>A clear sheet lies over the magnet. Sprinkle iron filings, then <b>tap the sheet</b> so they can move and line up.</p>
+    <div class="row">${btn('cfg:bar', 'One bar', 'sm' + (c === 'bar' ? ' on' : ''))}${btn('cfg:horse', 'Horseshoe', 'sm' + (c === 'horse' ? ' on' : ''))}${btn('cfg:unlike', 'Unlike poles facing', 'sm' + (c === 'unlike' ? ' on' : ''))}${btn('cfg:like', 'Like poles facing', 'sm' + (c === 'like' ? ' on' : ''))}</div>
+    <div class="row">${btn('sprinkle', '✨ Start / sprinkle', 'pri')}${btn('tap', '👆 Tap sheet', 'sm')}${btn('pause', FIL && FIL.pause ? '▶ Resume' : '⏸ Pause', 'sm')}${btn('more', '➕ Add more', 'sm')}${btn('clear', '🧹 Clear', 'sm')}${btn('orient', '🔄 Turn magnet', 'sm')}${btn('reset', '↺ Reset', 'sm')}</div>
+    <div class="pill">Filings on sheet: <span id="filN">0</span></div>
+    <div class="box an"><b>Look:</b> ${c === 'unlike' ? 'between unlike poles the filings join in curved lines that link the two magnets.' : c === 'like' ? 'between like poles the filings bend away from each other – there is a gap where the fields push apart.' : 'the filings gather most at the poles, where the field is strongest.'}</div>
+    <div class="box nt"><b>Careful: </b>the filings only <i>reveal</i> a pattern. They are not the magnetic field itself.</div>
+    <div class="box nt"><b>Safety: </b>in a real lab, wear safety glasses, keep filings sealed in a sheet or bottle, and never touch your eyes or mouth. Do not breathe the dust.</div>`;
+  }
+};
+
+/* =====================================================================
+   STAGES (part 2): materials, force, compass, electromagnet, everyday uses
+   ===================================================================== */
+/* ---------- MATERIALS ---------- */
+const MROWS = [['iron', -3, -6], ['steel', 1, -6], ['nickel', 5, -6], ['cobalt', 9, -6], ['wood', -3, 0], ['plastic', 1, 0], ['paper', 5, 0], ['glass', 9, 0], ['copper', -3, 6], ['aluminium', 1, 6], ['rubber', 5, 6]];
+Stage.list.materials = {
+  cam: { t: [0, 0, 0], d: 31, yaw: 0, pitch: 1.0 }, phys: true, sel: null,
+  enter() { this.build(); UI.render(); },
+  build() {
+    clearMags(); clearItems(); clearLabels(''); this.items = {};
+    const H = new Mag('horseshoe', { x: -11, z: 0, ang: 0, fixed: true, name: 'Test magnet', noDrag: true, lscale: 1.1 }); MAGS.push(H);
+    MROWS.forEach(r => { const it = new Item(r[0], r[1], r[2]); it.home = [r[1], r[2]]; it.pred = null; it.res = null; it.tmr = 0; this.items[r[0]] = it;
+      it.beforeDrag = () => { this.sel = r[0]; if (!it.pred) { toast('Predict first: will the magnet attract the ' + it.name.toLowerCase() + '?', null, null, 2600); UI.render(); return false; } return true; };
+      it.onStick = () => { if (!it.res) { it.res = 'yes'; UI.render(); this.check(); } };
+      addLabel('m:' + r[0], it.name, () => new THREE.Vector3(it.x, 1.7, it.z), ['materials']); });
+    this.sel = 'iron'; SEL.b = this.items.iron;
+  },
+  onSelect(b) { if (b && b.isItem) { this.sel = b.key; UI.render(); } },
+  check() { if (MROWS.every(r => this.items[r[0]].res)) toast('All materials tested! Read the results board.', null, null, 3500); },
+  update(dt) {
+    const H = MAGS[0]; H.updWorld();
+    for (const k in this.items) {
+      const it = this.items[k]; if (it.auto) { const p = H.wp[0], tx = p.x + 1.7, tz = (p.z + H.wp[1].z) / 2; it.x += (tx - it.x) * Math.min(1, dt * 2.2); it.z += (tz - it.z) * Math.min(1, dt * 2.2); if (Math.hypot(tx - it.x, tz - it.z) < .5) { it.auto = false; it.dragged = false; } it.sync(); }
+      if (!it.res && !it.host && !it.dragged) { let md = 99; for (const p of H.wp) md = Math.min(md, Math.hypot(p.x - it.x, p.z - it.z)); if (md < 3.2 && it.s === 0) { it.tmr += dt; if (it.tmr > 1.2) { it.res = 'no'; UI.render(); this.check(); } } else if (md >= 3.2) it.tmr = 0; }
+    }
+  },
+  act(k, v) {
+    const it = this.items[this.sel];
+    if (k === 'item') { this.sel = v; SEL.b = this.items[v]; UI.render(); }
+    else if (k === 'pred') { if (it) { it.pred = v; UI.render(); } }
+    else if (k === 'bring') { if (it && it.pred && !it.res) { it.host = null; it.dragged = true; it.auto = true; } else toast('Make a prediction first.', null, null, 1800); }
+    else if (k === 'back') { if (it) { it.host = null; it.x = it.home[0]; it.z = it.home[1]; it.vx = it.vz = 0; it.res = null; it.tmr = 0; it.sync(); UI.render(); } }
+    else if (k === 'reset') { this.build(); UI.render(); }
+  },
+  panel() {
+    const it = this.items[this.sel], rows = MROWS.map(r => { const m = this.items[r[0]], res = m.res, ok = m.pred && res ? ((m.pred === res) ? '✔' : '✖') : ''; return `<tr class="${r[0] === this.sel ? 'cur' : ''}" data-act="item:${r[0]}"><td>${MATS[r[0]].name}</td><td>${m.pred ? (m.pred === 'yes' ? 'Yes' : 'No') : '–'}</td><td>${res ? (res === 'yes' ? '🧲 Attracted' : 'Not attracted') : '–'}</td><td>${ok}</td></tr>`; }).join('');
+    let h = `<div class="kick">Materials Testing Station</div><h3>Which materials does a magnet attract?</h3><p>Pick an object, <b>predict</b>, then drag it to the magnet’s poles (or press “Bring it”).</p>`;
+    h += `<div class="box an"><b>Testing: ${it.name}</b>${!it.pred ? `<br>Will the magnet attract it?<div class="row">${btn('pred:yes', '🧲 Yes', 'pri')}${btn('pred:no', '🚫 No', 'pri')}</div>` : `<br>Your prediction: <b>${it.pred === 'yes' ? 'attracted' : 'not attracted'}</b>.${it.res ? `<br><b>${it.res === 'yes' ? 'It was attracted!' : 'It was not attracted.'}</b> ${it.pred === it.res ? 'Your prediction was right.' : 'Different from your prediction – that is how scientists learn!'}` : '<br>Now drag it to the magnet.'}<div class="row">${btn('bring', '➡ Bring it to the magnet', 'sm')}${btn('back', '↩ Put it back', 'sm')}</div>`}</div>`;
+    h += `<table class="rt"><thead><tr><th>Material</th><th>Predicted</th><th>Result</th><th></th></tr></thead><tbody>${rows}</tbody></table><div class="row">${btn('reset', '↺ Reset station', 'sm')}</div>`;
+    h += `<div class="box fact"><b>Not every metal is magnetic!</b> Iron, steel, nickel and cobalt are attracted (nickel and cobalt less strongly). Copper and aluminium are metals but are <i>not</i> attracted.</div><div class="box nt"><b>Careful: </b>stainless steels vary – some are magnetic and some are not. Real coins and tools can also differ from this model.</div>`;
+    return h;
+  }
+};
+
+/* ---------- FORCE & DISTANCE ---------- */
+const TRIALS = [[12, 4], [3, 9], [6, 2], [10, 15], [5, 1.5]];
+Stage.list.force = {
+  cam: { t: [3, 0, 0], d: 37, yaw: 0, pitch: 1.05 }, phys: true, gap: 8, hold: true, rep: false, ti: 0, tst: 'pred', tpred: null, tscore: [0, 0], tt: 0, physOpt: { bx: 17 },
+  enter() {
+    clearMags(); this.A = new Mag('bar', { x: -9, z: 0, fixed: true, name: 'Magnet A', noDrag: true }); this.B = new Mag('bar', { x: 0, z: 0, lockZ: true, lockRot: true, name: 'Magnet B', fixed: true, ang: 0 });
+    MAGS.push(this.A, this.B); this.B.limX = 17; this.ruler(); this.hold = true; this.rep = false; this.tst = 'pred'; this.ti = 0; this.setGap(8);
+    this.ar = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 2.3, 0), 2, 0x46e08f, .8, .55); G.add(this.ar); UI.render();
+  },
+  ruler() {
+    const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const x = c.getContext('2d'); x.fillStyle = 'rgba(240,248,255,.92)'; x.fillRect(0, 0, 1024, 64); x.fillStyle = '#04203a'; x.strokeStyle = '#04203a'; x.font = '700 24px system-ui'; x.textAlign = 'center';
+    for (let i = 0; i <= 20; i++) { const px = 8 + i * 50; x.beginPath(); x.moveTo(px, 0); x.lineTo(px, i % 5 === 0 ? 30 : 20); x.lineWidth = 3; x.stroke(); if (i % 2 === 0) x.fillText(i, px, 54); }
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(20.5, 1.3), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true })); m.rotation.x = -Math.PI / 2; m.position.set(-5.4 + 10.25 - .16, .03, 3.6); G.add(m);
+    const ln = new THREE.Mesh(new THREE.PlaneGeometry(20.5, .08), new THREE.MeshBasicMaterial({ color: 0x35d4ff })); ln.rotation.x = -Math.PI / 2; ln.position.set(-5.4 + 10.25 - .16, .02, 2.8); G.add(ln);
+  },
+  setGap(g) { this.gap = g; this.B.ang = this.rep ? Math.PI : 0; this.B.x = -9 + 2.6 + g + 2.6; this.B.sync(); this.B.vx = 0; },
+  gapNow() { return Math.abs((this.B.x - 2.6) - (this.A.x + 2.6)); },
+  strength() { return Math.hypot(this.B.fx, this.B.fz); },
+  update(dt) {
+    if (this.hold) { this.B.fixed = true; } else { this.B.fixed = false; this.B.userRot = false; }
+    if (this.B.dragged) this.B.fixed = true;
+    const f = this.strength(), lv = f < .3 ? 'Very weak' : f < 1 ? 'Weak' : f < 4 ? 'Medium' : f < 15 ? 'Strong' : 'Very strong'; this.lv = lv;
+    const e = $('#fGap'); if (e) { e.textContent = this.gapNow().toFixed(1) + ' cm'; $('#fLv').textContent = lv; $('#fB').style.width = clamp(Math.log(f / .15) / 5.5, .03, 1) * 100 + '%'; }
+    const attract = !this.rep, dir = (this.B.x > this.A.x ? 1 : -1) * (attract ? -1 : 1); this.ar.visible = f > .2; this.ar.setDirection(new THREE.Vector3(dir, 0, 0)); const L = 1 + clamp(Math.log(f / .3), 0, 4) * .6; this.ar.setLength(L, .8, .55); this.ar.position.set(this.B.x - 3.6 + (dir > 0 ? 0 : 0), 2.3, 0);
+    if (this.tst === 'run') { this.tt += dt; const tr = TRIALS[this.ti], ph = this.tt < 1.8 ? 0 : this.tt < 3.6 ? 1 : 2; if (ph < 2) { this.rep = false; this.hold = true; this.setGap(tr[ph]); this.ph = ph; this.pv = this.pv || []; if (this.tt > (ph ? 3.1 : 1.3) && this.pv[ph] === undefined) this.pv[ph] = f; } else { this.tst = 'done'; const ok = (this.tpred === 'same') ? tr[0] === tr[1] : (this.tpred === 'first') ? tr[0] < tr[1] : tr[1] < tr[0]; this.tres = ok; this.tscore[1]++; if (ok) this.tscore[0]++; UI.render(); } this.setSlider(); }
+  },
+  setSlider() { const s = $('#fg'); if (s) { s.value = this.gap; $('#fgv').textContent = this.gap.toFixed(1) + ' cm'; } },
+  input(k, v) { if (k === 'fg') { this.hold = true; this.setGap(v); $('#fgv').textContent = (+v).toFixed(1) + ' cm'; $('#hb').classList.add('on'); } },
+  act(k, v) {
+    if (k === 'orient') { this.rep = v === 'rep'; this.setGap(this.gap); UI.render(); }
+    else if (k === 'release') { this.hold = false; UI.render(); }
+    else if (k === 'hold') { this.hold = true; this.setGap(clamp(this.gapNow(), 1, 16)); UI.render(); }
+    else if (k === 'tp') { this.tpred = v; this.tst = 'run'; this.tt = 0; this.pv = []; this.hold = true; UI.render(); }
+    else if (k === 'tnext') { this.ti = (this.ti + 1) % TRIALS.length; this.tst = 'pred'; this.hold = true; this.rep = false; this.setGap(8); UI.render(); }
+  },
+  panel() {
+    const tr = TRIALS[this.ti]; let t;
+    if (this.tst === 'pred') t = `<b>Prediction trial ${this.ti + 1}:</b> compare the pull with the poles <b>${tr[0]} cm</b> apart and then <b>${tr[1]} cm</b> apart. When is the force stronger?<div class="row">${btn('tp:first', 'At ' + tr[0] + ' cm', 'sm pri')}${btn('tp:second', 'At ' + tr[1] + ' cm', 'sm pri')}${btn('tp:same', 'Same', 'sm')}</div>`;
+    else if (this.tst === 'run') t = `<b>Testing…</b> gap now ${this.gap} cm. Watch the force meter!`;
+    else t = `<b>${this.tres ? '✔ Correct!' : '✖ Not quite.'}</b> The force is <b>stronger when the magnets are closer</b>${tr[0] === tr[1] ? '' : ` (here ${Math.min(tr[0], tr[1])} cm beats ${Math.max(tr[0], tr[1])} cm)`}. Score ${this.tscore[0]}/${this.tscore[1]}.<div class="row">${btn('tnext', 'Next trial ▶', 'sm pri')}</div>`;
+    return `<div class="kick">Magnetic Force &amp; Distance</div><h3>Closer means stronger</h3>
+    <div class="row">${btn('orient:att', '🤝 Attract setup', 'sm' + (!this.rep ? ' on' : ''))}${btn('orient:rep', '↔️ Repel setup', 'sm' + (this.rep ? ' on' : ''))}</div>
+    ${sliderH('fg', 'Gap between the facing poles', this.gap, 1, 16, .5, this.gap.toFixed(1) + ' cm')}
+    <div class="row"><button class="btn sm on" id="hb" data-act="hold">✋ Hold</button>${btn('release', '▶ Let go', 'sm')}</div>
+    <div class="box an">Distance: <b id="fGap">–</b> · Force: <b id="fLv">–</b><div class="bar"><i id="fB" style="background:linear-gradient(90deg,#3b82ff,#ff4d5e)"></i></div></div>
+    <div class="box">${t}</div>
+    <div class="box nt"><b>Model note: </b>this force meter is <i>illustrative</i>, not calibrated. Real forces depend on the magnet’s shape and strength, but the pattern is the same: the force falls quickly as the distance grows.</div>`;
+  }
+};
+
+/* ---------- COMPASS ---------- */
+Stage.list.compass = {
+  cam: { t: [0, 0, 0], d: 28, yaw: 0, pitch: 1.1 }, phys: true, earth: true, globe: false, minis: false,
+  enter() {
+    clearMags(); const mp = document.createElement('canvas'); mp.width = 1024; mp.height = 648; const x = mp.getContext('2d'); x.fillStyle = 'rgba(10,40,80,.75)'; x.fillRect(0, 0, 1024, 648); x.strokeStyle = 'rgba(120,220,255,.5)'; x.lineWidth = 3; x.strokeRect(10, 10, 1004, 628);
+    x.fillStyle = 'rgba(255,255,255,.85)'; x.font = '900 70px system-ui'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('N', 512, 70); x.fillText('S', 512, 580); x.fillText('E', 960, 324); x.fillText('W', 66, 324);
+    x.strokeStyle = 'rgba(255,255,255,.2)'; x.lineWidth = 2; x.beginPath(); x.moveTo(512, 120); x.lineTo(512, 530); x.moveTo(110, 324); x.lineTo(910, 324); x.stroke();
+    const pm = new THREE.Mesh(new THREE.PlaneGeometry(29, 18.3), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(mp), transparent: true, depthWrite: false })); pm.rotation.x = -Math.PI / 2; pm.position.y = .02; G.add(pm); this.map = pm;
+    this.M = new Mag('bar', { x: 7, z: 2, ang: 0, name: 'Bar magnet' }); MAGS.push(this.M); 
+    this.c = new Compass({ x: -2.5, z: 1.5, scale: 1.25 }); COMP.push(this.c); this.earth = true; this.globe = false; this.minis = false; this.mkGlobe(); UI.render();
+    addLabel('c:n', 'Geographic north (map up)', () => new THREE.Vector3(0, .3, -8.4), ['compass']);
+  },
+  mkGlobe() {
+    const g = this.gg = new THREE.Group(); g.visible = false; G.add(g); g.position.set(0, 4.2, 0);
+    const c = document.createElement('canvas'); c.width = 512; c.height = 256; const x = c.getContext('2d'); x.fillStyle = '#134a8f'; x.fillRect(0, 0, 512, 256); x.fillStyle = '#3f9d58'; [[90, 70, 60, 40], [160, 150, 30, 50], [270, 80, 70, 45], [300, 160, 40, 45], [400, 90, 50, 30], [430, 190, 30, 20], [40, 200, 40, 20]].forEach(b => { x.beginPath(); x.ellipse(b[0], b[1], b[2], b[3], 0, 0, 6.3); x.fill(); }); x.fillStyle = '#fff'; x.fillRect(0, 0, 512, 16); x.fillRect(0, 240, 512, 16); x.strokeStyle = 'rgba(255,255,255,.25)'; for (let i = 0; i < 16; i++) { x.beginPath(); x.moveTo(i * 32, 0); x.lineTo(i * 32, 256); x.stroke(); } for (let j = 1; j < 8; j++) { x.beginPath(); x.moveTo(0, j * 32); x.lineTo(512, j * 32); x.stroke(); }
+    const sp = new THREE.Mesh(new THREE.SphereGeometry(2.6, 40, 28), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), roughness: .8 })); g.add(sp);
+    const ax = (col, tilt, len) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, len, 8), new THREE.MeshBasicMaterial({ color: col })); m.rotation.z = tilt; g.add(m); return m; };
+    ax(0xffffff, 0, 7.4); ax(0x35d4ff, -.19, 7.4);
+    const mk = (t, y, col, bg) => { const s = textSprite(t, col, 1.0, bg); s.position.set(0, y, 0); g.add(s); return s; };
+    mk('Geographic N pole', 4.4, '#fff', 'rgba(0,0,0,.6)').position.x = 2.6; mk('Magnetic pole (near N)', 3.5, '#35d4ff', 'rgba(0,0,0,.6)').position.x = -3.4; mk('Geographic S pole', -4.4, '#fff', 'rgba(0,0,0,.6)').position.x = 2.6;
+    const t = -.19, px = Math.sin(t) * 1.7, py = Math.cos(t) * 1.7; this.gp = [{ x: -px, y: -py + 4.2, z: 0, q: 1, cx: 0, cz: 0, axy: -1 }, { x: px, y: py + 4.2, z: 0, q: -1, cx: 0, cz: 0, axy: 1 }];
+    this.gp[0].x = Math.sin(.19) * 1.7 * 1; this.gp[1].x = -Math.sin(.19) * 1.7; this.gp[0].axy = -1; this.gp[1].axy = 1;
+  },
+  update(dt) {
+    this.M.updWorld(); this.M.sync();
+    const c = this.c; polesAll(PL); fieldAt(c.x, .55, c.z, PL, _o); const bm = Math.hypot(_o.x, _o.z), infl = bm / (bm + (this.earth ? EARTH : 1e-6));
+    this.tm = (this.tm || 0) + dt; if (this.tm > .15) { this.tm = 0; const e = $('#cBr'); if (e) { const b = c.bearing(), dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']; e.textContent = Math.round(b) + '° (' + dirs[Math.round(b / 45) % 8] + ')'; $('#cInf').textContent = Math.round(infl * 100) + '%'; $('#cIb').style.width = infl * 100 + '%'; } }
+    if (this.globe) { this.gg.rotation.y += dt * .15; FVg.setVisible(true); FVg.update(this.gp, { d3: true, n: 22, step: .26, R: 16 }); }
+  },
+  setEarth(v) { this.earth = v; COMP.forEach(c => c.earth = v); },
+  act(k, v) {
+    if (k === 'earth') { this.setEarth(!this.earth); UI.render(); }
+    else if (k === 'rot') { SEL.b = this.M; this.M.userRot = true; rotateSel(v === '+' ? Math.PI / 4 : v === '-' ? -Math.PI / 4 : Math.PI); }
+    else if (k === 'ring') { this.minis = !this.minis; while (COMP.length > 1) COMP.pop().dispose(); if (this.minis) for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283; const cc = new Compass({ x: this.M.x + Math.cos(a) * 7.2, z: this.M.z + Math.sin(a) * 5.2, scale: .55 }); cc.earth = this.earth; COMP.push(cc); } UI.render(); }
+    else if (k === 'globe') { this.globe = !this.globe; this.gg.visible = this.globe; FVg.setVisible(this.globe); this.map.visible = !this.globe; LBL.byId['c:n'].on = !this.globe; tableG.visible = !this.globe; this.M.g.visible = !this.globe; COMP.forEach(c => c.g.visible = !this.globe); if (this.globe) camGo({ t: [0, 4.2, 0], d: 17, yaw: .3, pitch: .35 }); else camGo(this.cam); UI.render(); }
+    else if (k === 'put') { this.c.x = this.M.x + (v === 'near' ? -4.2 : -11); this.c.z = this.M.z + 1; this.c.sync(); }
+  },
+  panel() {
+    return `<div class="kick">Compass Explorer</div><h3>A compass is a tiny magnet</h3>
+    <p>A compass needle lines up with the <b>local magnetic field</b>. Drag the compass and the magnet. Rotate the magnet with the buttons.</p>
+    <div class="box an">Needle bearing: <b id="cBr">–</b><br>Pull from the magnet: <b id="cInf">–</b><div class="bar"><i id="cIb" style="background:linear-gradient(90deg,#3b82ff,#ff4d5e)"></i></div></div>
+    <div class="row">${btn('earth', (this.earth ? '☑' : '☐') + ' Earth’s field', 'sm' + (this.earth ? ' on' : ''))}${btn('ring', (this.minis ? '☑' : '☐') + ' Compass ring', 'sm' + (this.minis ? ' on' : ''))}${btn('globe', this.globe ? '🗺 Back to map' : '🌍 Earth view', 'sm' + (this.globe ? ' on' : ''))}</div>
+    <div class="row">${btn('rot:-', '⟲ Rotate magnet', 'sm')}${btn('rot:+', '⟳', 'sm')}${btn('put:near', 'Compass near magnet', 'sm')}${btn('put:far', 'Compass far away', 'sm')}</div>
+    <div class="box fact"><b>Try:</b> bring the magnet close – the needle turns away from north and points along the magnet’s field. Move it far away – the needle returns to north. Turn the Earth’s field off to see only the magnet’s effect.</div>
+    <div class="box">${this.globe ? '<b>Earth is a giant magnet.</b> The white line is the geographic axis (the spin axis). The blue line shows the magnetic axis. It is tilted, so <b>geographic and magnetic poles are not the same place</b> – and the magnetic poles slowly wander. Earth’s magnetic pole in the north behaves like the <i>south</i> pole of a magnet, which is why a compass’s north-seeking end points there.' : 'Earth’s own weak field points the needle roughly north–south. A compass is only reliable away from magnets, steel and electric currents.'}</div>
+    <div class="box nt"><b>Model note: </b>Earth’s field here is simplified, and the globe’s field lines are an illustration.</div>`;
+  }
+};
+
+/* ---------- ELECTROMAGNET ---------- */
+Stage.list.electro = {
+  cam: { t: [-1, 0, 1], d: 27, yaw: 0, pitch: 1.0 }, phys: true, closed: false, turns: 30, cur: 2, core: true, lines: true, maxHold: 0,
+  enter() {
+    clearMags(); clearItems(); this.closed = false; this.turns = 30; this.cur = 2; this.core = true;
+    const em = this.em = new Mag('custom', { x: 0, z: 0, fixed: true, poles: [{ lx: 2.9, lz: 0, q: 1 }, { lx: -3.0, lz: 0, q: -1 }], circ: [[-1.2, 0, 1], [.4, 0, 1], [2.1, 0, .6]], name: 'Electromagnet', noDrag: true, qs: 0 }); em.em = true; MAGS.push(em);
+    em.g.add(this.nail = new THREE.Group()); const nc = cylM(.3, 6.1, M.iron, -.15, .7, 0, this.nail, 16); nc.rotation.z = Math.PI / 2; const tip = new THREE.Mesh(new THREE.ConeGeometry(.3, .6, 16), M.iron); tip.rotation.z = -Math.PI / 2; tip.position.set(3.2, .7, 0); this.nail.add(tip); const hd = cylM(.55, .16, M.iron, -3.2, .7, 0, this.nail, 20); hd.rotation.z = Math.PI / 2;
+    this.coilG = new THREE.Group(); em.g.add(this.coilG); this.wireG = new THREE.Group(); G.add(this.wireG); this.buildCoil();
+    em.lab.forEach(s => s.position.y = 2.2);
+    this.bat = new THREE.Group(); cylM(.9, 2.4, M.dark, 0, 1.2, 0, this.bat, 24); cylM(.9, .5, M.copper, 0, 2.5, 0, this.bat, 24); cylM(.3, .3, M.steel, 0, 2.9, 0, this.bat, 12); this.bat.position.set(-9.5, 0, -6.5); G.add(this.bat);
+    this.sw = new THREE.Group(); boxM(2.6, .3, 1.6, M.dark, 0, .15, 0, this.sw); cylM(.22, .5, M.steel, -1, .5, 0, this.sw, 10); cylM(.22, .5, M.steel, 1, .5, 0, this.sw, 10); this.lever = new THREE.Group(); boxM(2.2, .12, .35, M.wire, 1.1, 0, 0, this.lever); this.lever.position.set(-1, .8, 0); this.sw.add(this.lever); this.sw.position.set(-4.2, 0, -6.5); G.add(this.sw);
+    this.swb = { x: -4.2, z: -6.5, r: 1.7, isSw: true, selR: 2, g: this.sw, noMove: true }; this.swb.beforeDrag = () => { this.toggle(); return false; };
+    for (let i = 0; i < 10; i++) { const c = new Item('clip', 6 + (i % 5) * 1.5 + Math.random(), -3.6 + Math.floor(i / 5) * 3.2 + Math.random(), { ang: Math.random() * 3 }); c.onStick = () => { }; }
+    addLabel('e:coil', 'Coil of insulated wire', () => new THREE.Vector3(-1.2, 2.6, 0), ['electro']); addLabel('e:nail', 'Iron nail (core)', () => new THREE.Vector3(2.6, 1.8, 1.5), ['electro']); addLabel('e:bat', 'Battery', () => new THREE.Vector3(-9.5, 3.4, -6.5), ['electro']); addLabel('e:sw', 'Switch', () => new THREE.Vector3(-4.2, 1.6, -6.5), ['electro']); addLabel('e:clip', 'Steel paper clips', () => new THREE.Vector3(8, 1.2, -2), ['electro']);
+    this.apply(); FV.setVisible(this.lines); UI.render();
+  },
+  extraBodies() { return [this.swb]; },
+  buildCoil() {
+    while (this.coilG.children.length) { const c = this.coilG.children[0]; this.coilG.remove(c); c.geometry && c.geometry.dispose(); }
+    while (this.wireG.children.length) { const c = this.wireG.children[0]; this.wireG.remove(c); c.geometry && c.geometry.dispose(); }
+    const n = this.turns, pts = [], L = 4.2, x0 = -2.4; for (let i = 0; i <= n * 14; i++) { const t = i / (n * 14), a = t * n * 6.2832; pts.push(new THREE.Vector3(x0 + L * t, .7 + .62 * Math.cos(a), .62 * Math.sin(a))); }
+    const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), n * 14, .08, 6, false), M.wire); this.coilG.add(m);
+    const tube = (a, r) => { const mm = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(a), 24, .09, 6, false), M.wire); this.wireG.add(mm); };
+    const s = new THREE.Vector3(x0, 1.32, 0), e = pts[pts.length - 1].clone();
+    tube([s, new THREE.Vector3(x0, 1.6, -2), new THREE.Vector3(-3.2, .5, -6.5), new THREE.Vector3(-3.2, .5, -6.5).add(new THREE.Vector3(0, .1, 0))]); tube([new THREE.Vector3(-5.2, .5, -6.5), new THREE.Vector3(-8, 1.2, -6.5), new THREE.Vector3(-9.5, 3.1, -6.5)]);
+    tube([e, new THREE.Vector3(x0 + L, .5, 3), new THREE.Vector3(-9.5, .5, 3.5), new THREE.Vector3(-9.5, 2.2, -4.5), new THREE.Vector3(-9.5, .2, -6.5)]);
+    this.coilG.children[0].visible = true;
+  },
+  toggle() { this.closed = !this.closed; this.apply(); UI.render(); toast(this.closed ? 'Circuit closed: current flows through the coil.' : 'Circuit open: no current. Most clips drop!', null, null, 2200); },
+  strength() { if (!this.closed) return 0; return clamp((this.turns / 60) * (this.cur / 3) * (this.core ? 1 : .16) * 1.3, 0, 1.4); },
+  apply() { const S = this.strength(); this.S = S; this.em.qs = S * 5; this.nail.visible = this.core; this.maxHold = S < .08 ? 0 : Math.max(1, Math.round(S * 8.5)); this.lever.rotation.z = this.closed ? 0 : .6; this.em.lab.forEach(s => s.visible = S > .08); },
+  update(dt) {
+    this.lever.rotation.z += ((this.closed ? 0 : .6) - this.lever.rotation.z) * Math.min(1, dt * 10);
+    const held = ITEMS.filter(i => i.host === this.em);
+    if (held.length > this.maxHold) { held.sort((a, b) => b.x - a.x); held.slice(0, held.length - this.maxHold).forEach(i => { i.host = null; i.vx = 2 + Math.random() * 2; i.vz = (Math.random() - .5) * 4; }); }
+    this.nHeld = held.length; polesAll(PL); if (this.lines && this.S > .02) { FV.setVisible(true); FV.update(PL, { n: 16, y: MAGY + .25, step: .25 }); } else FV.setVisible(false);
+    this.tm = (this.tm || 0) + dt; if (this.tm > .2) { this.tm = 0; const e = $('#eHeld'); if (e) { e.textContent = this.nHeld + ' / 10'; $('#eB').style.width = clamp(this.S / 1.1, 0, 1) * 100 + '%'; } }
+    ITEMS.forEach(i => { if (i.host === this.em) { const k = ITEMS.indexOf(i) % 6; } });
+  },
+  input(k, v) { if (k === 'et') { this.turns = v; this.buildCoil(); $('#etv').textContent = v + ' turns'; } else if (k === 'ec') { this.cur = v; $('#ecv').textContent = ['Low', 'Medium', 'High'][v - 1]; } this.apply(); },
+  act(k, v) {
+    if (k === 'sw') this.toggle(); else if (k === 'core') { this.core = !this.core; this.apply(); UI.render(); } else if (k === 'lines') { this.lines = !this.lines; UI.render(); }
+    else if (k === 'reset') { this.enter(); }
+  },
+  panel() {
+    return `<div class="kick">Electromagnet Workshop</div><h3>A magnet you can switch on and off</h3>
+    <p>An electric current in a coil makes a magnetic field. An iron core makes it much stronger.</p>
+    <div class="row">${btn('sw', this.closed ? '🔌 Switch OFF (open the circuit)' : '⚡ Switch ON (close the circuit)', 'pri')}${btn('core', (this.core ? '☑' : '☐') + ' Iron core', 'sm' + (this.core ? ' on' : ''))}${btn('lines', (this.lines ? '☑' : '☐') + ' Field lines', 'sm' + (this.lines ? ' on' : ''))}${btn('reset', '↺ Reset', 'sm')}</div>
+    ${sliderH('et', 'Turns of wire', this.turns, 5, 60, 5, this.turns + ' turns')}${sliderH('ec', 'Current (low–high)', this.cur, 1, 3, 1, ['Low', 'Medium', 'High'][this.cur - 1])}
+    <div class="box an">Paper clips lifted: <b id="eHeld">0 / 10</b><div class="bar"><i id="eB" style="background:linear-gradient(90deg,#3b82ff,#35d4ff)"></i></div>The circuit is <b>${this.closed ? 'closed (current flowing)' : 'open (no current)'}</b>.</div>
+    <div class="box fact"><b>Temporary magnet:</b> the nail is magnetic only while current flows. Open the switch and the clips drop. <b>Uses:</b> electric bells, relays, and lifting magnets in scrapyards.</div>
+    <div class="box nt"><b>Model note: </b>more turns, more current and an iron core usually make it stronger, but strength depends on more than turns – current, the core and the coil’s design all matter. This is a simplified model. <b>Safe setup:</b> use a low-voltage battery, insulated wire and a switch. Never connect bare wire straight across a battery – it can get hot.</div>`;
+  }
+};
+
+/* =====================================================================
+   STAGE: Everyday Uses gallery (7 animated 3D models)
+   ===================================================================== */
+const USES = [
+  { id: 'fridge', ico: '🧊', n: 'Fridge door seal', d: 'A flexible strip of tiny magnets runs around the fridge door. The strip is attracted to the steel of the fridge body, so the door shuts tightly and keeps cold air in.', idea: 'Magnets attract steel (a magnetic material).', fact: 'The strip has many thin stripes of alternating N and S poles, which grip the steel door frame. Fridge magnets are weak compared with the big magnets in speakers or motors.' },
+  { id: 'compass', ico: '🧭', n: 'Compass', d: 'The needle is a small magnet that turns until it lines up with Earth’s magnetic field, so it helps people find directions.', idea: 'A magnet that can turn lines up with a magnetic field.', fact: 'Keep compasses away from magnets and steel – they can pull the needle off course.' },
+  { id: 'speaker', ico: '🔊', n: 'Speaker / headphones', d: 'A coil of wire sits next to a magnet. The sound signal makes current in the coil change, so the coil is pushed and pulled and shakes the cone. The moving air is the sound you hear.', idea: 'Electric current in a coil + a magnet = movement.', fact: 'Watch the cone move in and out.' },
+  { id: 'motor', ico: '⚙️', n: 'Electric motor', d: 'Current flows through a coil that sits between two magnets. The magnetic forces push one side of the coil up and the other down, so the coil spins. Fans, toys and washing machines use motors.', idea: 'Electric current in a magnetic field feels a force.', fact: 'Real motors use many coils and a device called a commutator to keep turning.' },
+  { id: 'catch', ico: '🚪', n: 'Magnetic door catch', d: 'A small magnet in the cupboard attracts a steel plate on the door. The door snaps shut and stays closed, with no latch that wears out.', idea: 'A magnet attracts steel; the pull is strongest when they are close.', fact: 'Watch the door swing: the pull gets stronger as the gap closes.' },
+  { id: 'crane', ico: '🏗️', n: 'Electromagnetic crane', d: 'A scrapyard crane has a huge electromagnet. Switch the current on and it lifts iron and steel scrap. Switch it off and the scrap drops where you want it.', idea: 'An electromagnet can be switched on and off.', fact: 'It can only lift magnetic scrap – it ignores copper, aluminium and plastic.' },
+  { id: 'mri', ico: '🏥', n: 'MRI scanner', d: 'A hospital MRI scanner uses a very powerful magnet (made with a big electromagnet) and radio waves to take pictures inside the body. These fields are far, far stronger than a fridge magnet.', idea: 'Very strong magnetic fields can be used safely for medical pictures.', fact: 'Metal objects must stay out of the room – the field can pull them with great force.' }
+];
+Stage.list.uses = {
+  cam: { t: [0, 2, 0], d: 18, yaw: .4, pitch: .35 }, table: false, phys: false, i: 0, auto: true, min: 5,
+  enter() { this.models = {}; this.mk(); this.pick(store.get('use', 0) % USES.length || 0); },
+  mk() {
+    const M7 = this.models, add = (id, g) => { g.visible = false; G.add(g); M7[id] = g; return g; };
+    const ped = g => { cylM(5, .5, M.dark, 0, -.25, 0, g, 48); const r = new THREE.Mesh(new THREE.TorusGeometry(5, .06, 6, 64), M.cyan); r.rotation.x = Math.PI / 2; g.add(r); };
+    /* fridge */ { const g = new THREE.Group(); ped(g); boxM(7, 9, 2, M.white, 0, 4.5, -.4, g); boxM(5.4, 8.6, .2, M.alu, 0, 4.5, .7, g); for (let i = 0; i < 18; i++) boxM(.25, 8.4, .1, i % 2 ? M.red : M.blue, -3.1 + i * .36, 4.5, .85, g); boxM(.2, 3, .3, M.dark, 3.4, 5.5, .9, g); this.note = boxM(2.2, 2.6, .05, M.plastic, -1, 5.5, 1.1, g); const mg = cylM(.4, .2, M.red, -1, 6.5, 1.15, g, 20); mg.rotation.x = Math.PI / 2; add('fridge', g); }
+    /* compass */ { const g = new THREE.Group(); ped(g); this.bigC = new Compass({ x: 0, z: 0, scale: 2.4, earth: true, noDrag: true }); G.remove(this.bigC.g); g.add(this.bigC.g); this.bigC.g.position.y = .2; add('compass', g); }
+    /* speaker */ { const g = new THREE.Group(); ped(g); boxM(6, 8, 4, M.dark, 0, 4, 0, g); this.cone = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 1, 1.4, 32, 1, true), new THREE.MeshStandardMaterial({ color: 0xdfe6f2, side: THREE.DoubleSide, roughness: .6 })); this.cone.rotation.x = Math.PI / 2; this.cone.position.set(0, 4.6, 2.1); g.add(this.cone); const tw = new THREE.Mesh(new THREE.TorusGeometry(2.6, .2, 8, 32), M.steel); tw.position.set(0, 4.6, 2.2); g.add(tw);
+      this.ringM = new THREE.Group(); const m1 = new THREE.Mesh(new THREE.TorusGeometry(1.5, .55, 10, 32, Math.PI), M.red), m2 = new THREE.Mesh(new THREE.TorusGeometry(1.5, .55, 10, 32, Math.PI), M.blue); m2.rotation.z = Math.PI; this.ringM.add(m1, m2); this.ringM.position.set(0, 4.6, 1.1); g.add(this.ringM); const vc = new THREE.Mesh(new THREE.TorusGeometry(.8, .1, 6, 24), M.wire); this.vc = vc; vc.position.set(0, 4.6, 1.6); g.add(vc); add('speaker', g); }
+    /* motor */ { const g = new THREE.Group(); ped(g); const mkA = (col, th) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 3, 28, 1, true, th, Math.PI * .8), new THREE.MeshStandardMaterial({ color: col, metalness: .4, roughness: .4, side: THREE.DoubleSide })); m.rotation.z = Math.PI / 2; m.position.y = 3.6; g.add(m); }; mkA(0xe0233a, Math.PI * .1 + Math.PI / 2 * 0 + 0); mkA(0x2468e8, Math.PI * 1.1);
+      this.rot = new THREE.Group(); this.rot.position.y = 3.6; const loop = new THREE.Mesh(new THREE.TorusGeometry(1.6, .12, 6, 4), M.wire); loop.scale.set(1, 1, 1); loop.rotation.set(0, Math.PI / 2, Math.PI / 4); const b = boxM(2.6, .15, 1.2, M.wire, 0, 0, 0, this.rot); b.visible = false; const lp = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.6, .25), new THREE.MeshStandardMaterial({ color: 0xff8a3d, wireframe: false, transparent: true, opacity: .8 })); this.rot.add(lp); const sh = cylM(.18, 8, M.steel, 0, 0, 0, this.rot, 12); sh.rotation.z = Math.PI / 2; g.add(this.rot); add('motor', g); }
+    /* catch */ { const g = new THREE.Group(); ped(g); boxM(7, 7, .3, M.wood, 0, 3.8, -1.8, g); boxM(.3, 7, 3.6, M.wood, -3.5, 3.8, 0, g); boxM(.3, 7, 3.6, M.wood, 3.5, 3.8, 0, g); boxM(7, .3, 3.6, M.wood, 0, 7.3, 0, g); boxM(7, .3, 3.6, M.wood, 0, .3, 0, g); boxM(.9, .6, .6, M.red, 2.9, 5.3, 0, g); boxM(.9, .6, .6, M.blue, 2.9, 4.7, 0, g);
+      this.door = new THREE.Group(); this.door.position.set(-3.5, 3.8, 1.8); boxM(6.9, 7, .3, M.wood, 3.45, 0, 0, this.door); boxM(.7, 1.6, .15, M.steel, 6.3, 1.5, -.22, this.door); cylM(.2, .5, M.steel, 5.6, 0, .35, this.door, 10); g.add(this.door); add('catch', g); }
+    /* crane */ { const g = new THREE.Group(); ped(g); boxM(2, .6, 2, M.dark, -3, .3, 0, g); boxM(.5, 8, .5, M.wire, -3, 4.3, 0, g); this.boom = new THREE.Group(); this.boom.position.set(-3, 8.2, 0); boxM(9, .4, .4, M.wire, 4.5, 0, 0, this.boom); g.add(this.boom); this.cab = new THREE.Group(); this.cab.position.set(6, 8.2, 0); this.cable = cylM(.04, 1, M.steel, 0, -.5, 0, this.cab, 6); this.mag = new THREE.Group(); const dsk = cylM(1.1, .6, M.steel, 0, 0, 0, this.mag, 28); for (let i = 0; i < 3; i++) { const r = new THREE.Mesh(new THREE.TorusGeometry(.75 - i * .2, .06, 6, 24), M.wire); r.rotation.x = Math.PI / 2; r.position.y = .33; this.mag.add(r); } this.cab.add(this.mag); g.add(this.cab);
+      this.scrap = []; for (let i = 0; i < 6; i++) { const m = boxM(.7, .5, .6, i % 3 ? M.iron : M.steel, 5 + (i % 3) * .6 - .6, .25 + Math.floor(i / 3) * .5, (i % 2) * .6 - .3, g); m.userData.h = m.position.clone(); this.scrap.push(m); } const al = boxM(.7, .4, .6, M.alu, 7.4, .2, .4, g); this.cT = 0; this.spark = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex('rgba(120,230,255,1)', 'rgba(60,160,255,.5)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); this.spark.scale.set(2.8, 2.8, 1); this.mag.add(this.spark); add('crane', g); }
+    /* mri */ { const g = new THREE.Group(); ped(g); const tr = new THREE.Mesh(new THREE.TorusGeometry(3.4, 1.5, 24, 56), new THREE.MeshStandardMaterial({ color: 0xeef3fa, roughness: .35, metalness: .15 })); tr.position.y = 4.4; g.add(tr); const rg = new THREE.Mesh(new THREE.TorusGeometry(2.0, .06, 6, 48), M.cyan); rg.position.y = 4.4; g.add(rg); this.bed = new THREE.Group(); boxM(2, .3, 8, M.alu, 0, 3.2, 0, this.bed); const pt = new THREE.Mesh(new THREE.CapsuleGeometry(.5, 3, 4, 10), new THREE.MeshStandardMaterial({ color: 0xffb36b, roughness: .8 })); pt.rotation.x = Math.PI / 2; pt.position.set(0, 3.9, 0); this.bed.add(pt); g.add(this.bed); boxM(2.4, 1, 7, M.dark, 0, 1.5, 3.5, g); this.glow = rg; add('mri', g); }
+  },
+  pick(i) { this.i = i; store.set('use', i); const id = USES[i].id; Object.keys(this.models).forEach(k => this.models[k].visible = k === id); this.cT = 0; this.t0 = 0; camGo(id === 'crane' ? { t: [1, 4, 0], d: 25, yaw: .3, pitch: .3 } : id === 'compass' ? { t: [0, 1.2, 0], d: 17, yaw: .2, pitch: .8 } : { t: [0, 4.6, 0], d: id === 'fridge' ? 30 : id === 'mri' ? 25 : 23, yaw: .5, pitch: .3 }); clearLabels(''); if (id === 'crane') this.cl = addLabel('u:cr', 'Current ON', () => { const v = new THREE.Vector3(); this.mag.getWorldPosition(v); v.y += 1.6; return v; }, ['uses'], { always: true }); if (id === 'mri') addLabel('u:m', 'Strong magnet – no metal!', () => new THREE.Vector3(0, 8.6, 0), ['uses'], { always: true }); if (id === 'fridge') addLabel('u:f', 'Magnetic strip', () => new THREE.Vector3(-3.1, 8.8, 0.9), ['uses']); if (id === 'speaker') { addLabel('u:s1', 'Magnet', () => new THREE.Vector3(0, 6.3, 1.1), ['uses']); addLabel('u:s2', 'Cone', () => new THREE.Vector3(2.2, 6.8, 2.2), ['uses']); } if (id === 'motor') addLabel('u:mo', 'Coil between magnets', () => new THREE.Vector3(0, 6.8, 0), ['uses']); if (id === 'catch') addLabel('u:c', 'Magnet + steel plate', () => new THREE.Vector3(3, 6.2, 0), ['uses']); UI.render(); },
+  update(dt) {
+    this.t0 = (this.t0 || 0) + dt; const t = this.t0, id = USES[this.i].id;
+    if (id === 'fridge') { this.note.rotation.z = .03 * Math.sin(t * 1.2); }
+    if (id === 'compass') { const c = this.bigC; if (!this.kk || t > this.kk) { this.kk = t + 5; c.w += (Math.random() < .5 ? 1 : -1) * 5; } c.update(dt, [], _o); c.needle.rotation.y = -c.ang; }
+    if (id === 'speaker') { const a = Math.sin(t * 14) * .18 * (.6 + .4 * Math.sin(t * 2.3)); this.cone.position.z = 2.1 + a; this.vc.position.z = 1.6 + a; }
+    if (id === 'motor') this.rot.rotation.x += dt * 3.2;
+    if (id === 'catch') { const ph = (t % 7) / 7, open = ph < .15 ? 1.2 : ph < .5 ? 1.2 - 1.2 * sstep(.15, .5, ph) * sstep(.15, .5, ph) * (3 - 2 * sstep(.15, .5, ph)) * 1 : ph < .75 ? 0 : 1.2 * sstep(.75, .9, ph); this.door.rotation.y = -open; }
+    if (id === 'crane') {
+      const p = (t % 14) / 14; let bx = 6, dn = 0, on = false;
+      if (p < .12) bx = lerp(6, 5, sstep(0, .12, p)); else if (p < .3) { bx = 5; dn = 6.6 * sstep(.12, .3, p); } else if (p < .45) { bx = 5; dn = 6.6 * (1 - sstep(.3, .45, p)); on = true; } else if (p < .65) { bx = lerp(5, -.5, sstep(.45, .65, p)); on = true; } else if (p < .78) { bx = -.5; dn = 2.4 * sstep(.65, .78, p); on = true; } else if (p < .88) { bx = -.5; dn = 2.4; } else { bx = lerp(-.5, 6, sstep(.88, 1, p)); dn = 2.4 * (1 - sstep(.88, .96, p)); }
+      this.cab.position.x = bx; this.cable.scale.y = Math.max(.1, dn + .5); this.cable.position.y = -(dn + .5) / 2; this.mag.position.y = -dn - .5; this.spark.visible = on; if (this.cl) this.cl.el.textContent = on ? '⚡ Current ON – lifting' : 'Current OFF';
+      this.scrap.forEach((s, i) => { const h = s.userData.h, r = Math.floor(i / 3), ox = ((i % 3) - 1) * .45, oz = (i % 2) * .4 - .2;
+        if (p < .3) s.position.copy(h);
+        else if (p < .78) s.position.set(bx + ox, 8.2 - dn - .5 - .62 - r * .45, oz);
+        else if (p < .88) { const f = sstep(.78, .88, p), y0 = 8.2 - 2.4 - .5 - .62 - r * .45; s.position.set(-.5 + ox, lerp(y0, .25 + r * .5, f * f), oz); }
+        else s.position.set(-.5 + ox, .25 + r * .5, oz); });
+    }
+    if (id === 'mri') { const s = (Math.sin(t * .5) * .5 + .5); this.bed.position.z = lerp(-1, 4, s) * -1 + 1.5; this.glow.material.color.setHSL(.54, 1, .5 + .15 * Math.sin(t * 4)); }
+  },
+  act(k, v) { if (k === 'use') this.pick(+v); },
+  panel() {
+    const u = USES[this.i]; return `<div class="kick">Everyday Uses</div><h3>${u.ico} ${u.n}</h3><p>${u.d}</p><div class="box an"><b>Magnet idea: </b>${u.idea}</div><div class="box fact">${u.fact}</div>
+    ${this.i === 6 ? '<div class="box nt"><b>Careful: </b>an MRI uses powerful fields, nothing like a fridge magnet. Never take metal into an MRI room.</div>' : ''}
+    <div class="row">${btn('use:' + ((this.i + 6) % 7), '◀ Previous', 'sm')}${btn('use:' + ((this.i + 1) % 7), 'Next ▶', 'sm pri')}</div><p style="font-size:14px;color:var(--muted)">Drag to look around the 3D model.</p>`;
+  },
+  chips: () => USES.map((u, i) => [u.ico, u.n, i])
+};
+
+
+/* =====================================================================
+   UI: navigation, panel, modal
+   ===================================================================== */
+const NAV = [
+  ['title', '🏠', 'Home'], ['lab', '🧲', 'Magnetic Laboratory'], ['poles', '↔️', 'Magnetic Poles'], ['field', '🌀', 'Field Explorer'], ['filings', '✨', 'Iron Filings'], ['materials', '🔩', 'Materials Testing'], ['force', '📏', 'Magnetic Force'],
+  ['compass', '🧭', 'Compass'], ['electro', '⚡', 'Electromagnet Workshop'], ['uses', '🌍', 'Everyday Uses'], ['act', '🎯', 'Activities'], ['quiz', '❓', 'Quiz'], ['gloss', '📖', 'Glossary'], ['help', 'ℹ️', 'Help']
+];
+const MODALS = ['act', 'quiz', 'gloss', 'help'];
+const UI = {
+  panel: null,
+  setPanel(html, show) { const p = this.panel, sc = p.scrollTop, same = p.dataset.k === W.mode; p.innerHTML = '<button class="pmin" aria-label="Minimise or expand this panel">▾</button>' + html; p.dataset.k = W.mode; if (!same) p.classList.remove('min'); p.classList.toggle('show', show !== false); p.scrollTop = same ? sc : 0; this.bindPanel(); applyViewOffset(); },
+  bindPanel() {
+    const p = this.panel; $('.pmin', p).onclick = () => { p.classList.toggle('min'); applyViewOffset(); };
+    $$('[data-act]', p).forEach(b => b.onclick = () => this.act(b.dataset.act, b));
+    $$('[data-in]', p).forEach(b => b.oninput = () => this.input(b.dataset.in, +b.value, b));
+  },
+  render() {
+    const s = Stage.cur; if (!s) return; const h = s.panel ? s.panel() : '';
+    if (!h) { this.panel.classList.remove('show'); applyViewOffset(); } else this.setPanel(h);
+    if (s.afterRender) s.afterRender();
+  },
+  navMark(k) { $$('.nb').forEach(b => b.classList.toggle('on', b.dataset.k === k)); },
+  go(k) {
+    if (MODALS.includes(k)) { Modal.openKind(k); return; }
+    Modal.close(true);
+    if (NO3D.v) { $('#title').classList.toggle('gone', k !== 'title'); document.body.classList.toggle('is-title', k === 'title'); if (k !== 'title') { $('#top').style.visibility = 'visible'; this.setPanel('<h3>3D view not available</h3><p>Your device could not start the 3D scene. The <b>Activities</b>, <b>Quiz</b>, <b>Glossary</b> and <b>Help</b> sections still work from the menu below.</p>'); } return; }
+    const t = k === 'title';
+    $('#title').classList.toggle('gone', !t); document.body.classList.toggle('is-title', t); $('#top').style.visibility = t ? 'hidden' : 'visible';
+    $('#backBtn').style.display = t ? 'none' : 'inline-block'; document.body.classList.toggle('has-back', !t);
+    const sb = $('#stagebar'); sb.classList.remove('show'); document.documentElement.style.setProperty('--stageh', '0px'); this.panel.classList.remove('show');
+    Stage.enter(k); this.navMark(k);
+    if (k === 'uses') this.renderStageBar();
+    if (t) this.panel.classList.remove('show');
+    applyViewOffset(); store.set('last', k);
+  },
+  renderStageBar() {
+    const sb = $('#stagebar'); sb.innerHTML = `<div class="chips" role="tablist" aria-label="Everyday uses">${USES.map((u, i) => `<button class="sc" role="tab" data-act="use:${i}" aria-label="${u.n}"><span>${u.ico}</span><span class="n">${u.n}</span></button>`).join('')}</div>`;
+    sb.classList.add('show'); $$('[data-act]', sb).forEach(b => b.onclick = () => this.act(b.dataset.act, b)); this.markUse();
+    requestAnimationFrame(() => { document.documentElement.style.setProperty('--stageh', (sb.offsetHeight + 12) + 'px'); applyViewOffset(); });
+  },
+  markUse() { $$('#stagebar .sc').forEach((b, k) => { b.classList.toggle('on', k === Stage.list.uses.i); }); },
+  act(a, el) {
+    const i = a.indexOf(':'), k = i < 0 ? a : a.slice(0, i), v = i < 0 ? '' : a.slice(i + 1), s = Stage.cur;
+    if (s && s.act) s.act(k, v, el); if (k === 'use') this.markUse();
+  },
+  input(k, v, el) { const s = Stage.cur; if (s && s.input) s.input(k, v, el); },
+  syncPause() { const b = $('#pauseBtn'); b.textContent = W.paused ? '▶' : '⏸'; b.classList.toggle('on', W.paused); b.setAttribute('aria-label', W.paused ? 'Resume animation' : 'Pause animation'); }
+};
+
+const Modal = {
+  el: null, raf: 0, kind: null,
+  open(title, html, kind) {
+    this.close(true); this.el = $('#modal'); this.kind = kind; W.modalOpen = true;
+    this.el.innerHTML = `<div class="sheet" role="document"><header><h2 id="mTitle">${title}</h2><button class="tb" id="mClose" aria-label="Close and go back">✕</button></header><div class="body" id="mBody">${html}</div></div>`;
+    this.el.classList.add('open'); this.el.setAttribute('aria-labelledby', 'mTitle');
+    $('#mClose').onclick = () => this.close(); this.el.onclick = e => { if (e.target === this.el) this.close(); };
+    $('#mClose').focus(); UI.navMark(kind); return $('#mBody');
+  },
+  close(silent) {
+    cancelAnimationFrame(this.raf); this.raf = 0; const m = $('#modal'); if (!m.classList.contains('open')) return;
+    m.classList.remove('open'); m.innerHTML = ''; W.modalOpen = false; this.kind = null;
+    if (!silent) { UI.navMark(W.mode); const c = $('#gl'); c && c.focus && c.focus({ preventScroll: true }); }
+  },
+  loop(fn) { let last = performance.now(); const f = now => { const dt = Math.min(.05, (now - last) / 1000); last = now; fn(dt, now / 1000); this.raf = requestAnimationFrame(f); }; this.raf = requestAnimationFrame(f); },
+  openKind(k) { if (k === 'act') Acts.open(); else if (k === 'quiz') Quiz.open(); else if (k === 'gloss') Glossary.open(); else if (k === 'help') Help.open(); }
+};
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (W.present) togglePresent(false); else if ($('#modal').classList.contains('open')) Modal.close(); else $('#settings').classList.remove('open'); }
+  if (e.key === 'Tab' && $('#modal').classList.contains('open')) {
+    const f = $$('#modal button,#modal input,#modal select,#modal summary,#modal [tabindex="0"]').filter(x => !x.disabled && x.offsetParent !== null); if (!f.length) return;
+    const a = f[0], b = f[f.length - 1]; if (e.shiftKey && document.activeElement === a) { e.preventDefault(); b.focus(); } else if (!e.shiftKey && document.activeElement === b) { e.preventDefault(); a.focus(); }
+  }
+});
+
+const PWA = {
+  ev: null, reg: null, standalone: false,
+  init() {
+    this.standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); this.ev = e; $('#installBtn').style.display = this.standalone ? 'none' : 'inline-block'; this.refresh(); });
+    window.addEventListener('appinstalled', () => { this.ev = null; this.standalone = true; $('#installBtn').style.display = 'none'; toast('The app was installed. You can open it from your home screen or app list.'); this.refresh(); });
+    $('#installBtn').onclick = () => this.install();
+    const net = () => { const on = navigator.onLine; const c = $('#netChip'); c.classList.toggle('off', !on); c.lastChild.textContent = on ? 'Online' : 'Offline – using saved files'; this.refresh(); }; window.addEventListener('online', net); window.addEventListener('offline', net); net();
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      navigator.serviceWorker.register('service-worker.js').then(r => {
+        this.reg = r; this.swState = 'registered';
+        const watch = w => w && w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) toast('A new version is ready.', 'Refresh', () => { w.postMessage('SKIP_WAITING'); }, 0); });
+        if (r.waiting && navigator.serviceWorker.controller) toast('A new version is ready.', 'Refresh', () => r.waiting.postMessage('SKIP_WAITING'), 0);
+        r.addEventListener('updatefound', () => watch(r.installing));
+        navigator.serviceWorker.ready.then(() => { this.swState = 'ready'; this.refresh(); });
+      }).catch(err => { this.swState = 'failed'; this.swErr = err && err.message; this.refresh(); });
+      let rl = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (rl) return; rl = true; location.reload(); });
+    } else { this.swState = location.protocol === 'file:' ? 'file' : 'unsupported'; }
+  },
+  async install() {
+    if (this.ev) { this.ev.prompt(); const r = await this.ev.userChoice; if (r.outcome !== 'accepted') toast('Installation cancelled. You can try again any time.'); this.ev = null; $('#installBtn').style.display = 'none'; this.refresh(); }
+    else Help.open('install');
+  },
+  status() {
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    let inst, off;
+    if (this.standalone) inst = '✔ Installed – you are using the installed app.'; else if (this.ev) inst = '✔ Installation is available. Use the “Install App” button.';
+    else if (ios) inst = 'ℹ In Safari tap the Share button, then “Add to Home Screen”.'; else if (location.protocol === 'file:') inst = '✖ Not available when the file is opened directly (file://). Host it on HTTPS or use localhost.'; else inst = 'ℹ Not offered right now. Use your browser menu (“Install app” or “Add to Home screen”) if it appears there.';
+    off = this.swState === 'ready' ? '✔ Saved for offline use. The app will open without internet.' : this.swState === 'registered' ? '… Saving files for offline use…' : this.swState === 'failed' ? '✖ Offline saving failed: ' + esc(this.swErr || 'unknown error') : this.swState === 'file' ? '✖ Offline saving needs HTTPS or localhost (not file://).' : '✖ This browser or address does not support offline saving.';
+    return [inst, off];
+  },
+  refresh() { const e = $('#pwaStat'); if (e) { const s = this.status(); e.innerHTML = `<div class="box ${this.standalone || this.ev ? 'fact' : 'nt'}"><b>Install: </b>${s[0]}</div><div class="box ${this.swState === 'ready' ? 'fact' : 'nt'}"><b>Offline: </b>${s[1]}</div><div class="box"><b>Connection: </b>${navigator.onLine ? 'Online' : 'Offline'}</div>${this.ev ? '<button class="btn pri" id="hInst">⬇ Install App</button>' : ''}`; const b = $('#hInst'); if (b) b.onclick = () => this.install(); } }
+};
+
+const Help = {
+  open(focus) {
+    Modal.open('ℹ️ Help & About', `<div class="cols"><div>
+      <h3>How to use the app</h3>
+      <ul><li><b>Move things:</b> drag a magnet or object with a finger or mouse.</li><li><b>Rotate a magnet:</b> tap it, then use ⟲ ⟳ ⇄ (or the Q and E keys).</li><li><b>Turn the view:</b> drag empty space. <b>Zoom:</b> pinch, scroll, or use ＋ / － (arrow keys work when the 3D view is selected).</li><li><b>Reset camera:</b> ⌖. <b>Pause:</b> ⏸ or the Space key. <b>Labels:</b> 🏷. <b>Settings:</b> ⚙ (speed and graphics).</li><li><b>Presentation mode:</b> 📽 for teaching a class – bigger text, full screen.</li></ul>
+      <h3>The menu</h3>
+      <ul><li><b>Laboratory</b> – free play with magnets and objects.</li><li><b>Poles</b> – predict attract or repel.</li><li><b>Field Explorer</b> and <b>Iron Filings</b> – see the invisible field.</li><li><b>Materials</b> – which materials are magnetic?</li><li><b>Force</b> – how distance changes the pull.</li><li><b>Compass</b> and <b>Electromagnet</b> – Earth’s field and switchable magnets.</li><li><b>Everyday Uses</b>, <b>Activities</b>, <b>Quiz</b> and <b>Glossary</b>.</li></ul>
+      <div class="box nt"><b>About accuracy: </b>The simulations are simplified models for learning. Forces use illustrative units and distances in “cm”; field lines are a picture, not real threads. Real magnets are more complicated.</div></div>
+      <div><h3>Install &amp; offline</h3><div id="pwaStat"></div>
+      <div class="box"><b>To use offline:</b> host the folder on an HTTPS site (or run it on localhost), open it once while online, then it works without internet. On Android Chrome: menu ⋮ → “Install app”. On iPhone/iPad Safari: Share → “Add to Home Screen”.</div>
+      <h3>Credits</h3><div class="box fact">Developed by <b>Mateen Yousuf — Teacher</b>.<br>Built with Three.js (included in the app, no internet needed). No accounts, no tracking, no backend.</div>
+      <div class="row"><button class="btn" id="hReset">Clear saved progress</button></div></div></div>`, 'help');
+    PWA.refresh(); $('#hReset').onclick = () => { try { Object.keys(localStorage).filter(k => k.startsWith('mg_')).forEach(k => localStorage.removeItem(k)); } catch (e) { } toast('Saved progress cleared.'); };
+    if (focus === 'install') $('#pwaStat').scrollIntoView();
+  }
+};
+
+/* =====================================================================
+   ACTIVITIES A–D
+   ===================================================================== */
+const Acts = {
+  done: store.get('acts', {}),
+  mark(k, t) { this.done[k] = t; store.set('acts', this.done); },
+  open() {
+    const L = [['A', '🧲', 'Predict the Poles', 'Look at two magnets and say if they attract or repel. 8 rounds.'], ['B', '🔩', 'Magnetic Material Hunt', 'Sort everyday objects: magnetic, not magnetic, or it depends.'], ['C', '🌀', 'Follow the Field', 'Find strong regions and the direction of the field.'], ['D', '⚡', 'Build the Strongest Electromagnet', 'Predict which design lifts the most paper clips.']];
+    const b = Modal.open('🎯 Activities', `<p>Choose an activity. Your best results are saved on this device.</p><div class="cards">${L.map(a => `<div class="card click" tabindex="0" role="button" data-a="${a[0]}"><h4>${a[1]} ${a[0]}. ${a[2]}</h4><p>${a[3]}</p>${this.done[a[0]] ? `<span class="pill">Best: ${esc(this.done[a[0]])}</span>` : ''}</div>`).join('')}</div>`, 'act');
+    $$('.card', b).forEach(c => { const go = () => this['run' + c.dataset.a](); c.onclick = go; c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }; });
+  },
+  shell(title, body) { const b = Modal.open(title, body, 'act'); return b; },
+  bestOf(k, s, n) { const cur = this.done[k] ? parseInt(this.done[k]) : -1; if (s > cur) this.mark(k, s + '/' + n); },
+  back() { return `<button class="btn" id="aBack">◀ All activities</button>`; },
+
+  /* ---- A: Predict the poles ---- */
+  runA() {
+    this.A = { i: 0, s: 0, n: 8 }; this.stepA();
+  },
+  stepA() {
+    const a = this.A; if (a.i >= a.n) { this.bestOf('A', a.s, a.n); const b = this.shell('🧲 Predict the Poles', `<div style="text-align:center"><div style="font-size:64px">${a.s >= 7 ? '🏆' : a.s >= 5 ? '🌟' : '🧲'}</div><h3>You scored ${a.s} / ${a.n}</h3><p>${a.s >= 7 ? 'Excellent! You know the rule of poles.' : 'Good effort! Remember: like poles repel, unlike poles attract.'}</p><div class="row" style="justify-content:center"><button class="btn pri" id="aAgain">🔁 Play again</button>${this.back()}</div></div>`); $('#aAgain').onclick = () => this.runA(); $('#aBack').onclick = () => this.open(); return; }
+    const L = Math.random() < .5, R = Math.random() < .5; /* L: left magnet has N on its right end; R: right magnet has N on its left end */
+    const lf = L ? 'N' : 'S', rf = R ? 'N' : 'S', rep = lf === rf; a.rep = rep;
+    const bar = (x, nLeft) => { const lc = nLeft ? '#e0233a' : '#2468e8', rc = nLeft ? '#2468e8' : '#e0233a', ll = nLeft ? 'N' : 'S', rl = nLeft ? 'S' : 'N'; return `<rect x="${x}" y="30" width="110" height="60" fill="${lc}" rx="6"/><rect x="${x + 110}" y="30" width="110" height="60" fill="${rc}" rx="6"/><text x="${x + 55}" y="72" text-anchor="middle" font-size="40" font-weight="900" fill="#fff">${ll}</text><text x="${x + 165}" y="72" text-anchor="middle" font-size="40" font-weight="900" fill="#fff">${rl}</text>`; };
+    const svg = `<svg viewBox="0 0 640 120" role="img" aria-label="Two bar magnets. The left magnet's right end is ${lf}. The right magnet's left end is ${rf}." style="width:100%;max-width:640px">${bar(20, !L)}${bar(400, R)}<text x="320" y="68" text-anchor="middle" font-size="24" fill="#8fe9ff">? ? ?</text></svg>`;
+    const b = this.shell('🧲 Predict the Poles', `<div class="lh" style="justify-content:space-between"><span class="pill">Round ${a.i + 1} of ${a.n}</span><span class="pill">⭐ ${a.s}</span></div><h3>The facing ends are <b>${lf}</b> and <b>${rf}</b>. What will happen?</h3><div style="text-align:center">${svg}</div><div class="row" style="justify-content:center"><button class="btn pri" data-p="attract">🤝 Attract</button><button class="btn pri" data-p="repel">↔️ Repel</button></div><div id="aFb" aria-live="polite"></div>`);
+    $$('[data-p]', b).forEach(bt => bt.onclick = () => { const ok = (bt.dataset.p === 'repel') === rep; if (ok) a.s++; $$('[data-p]', b).forEach(x => x.disabled = true); $('#aFb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Correct!' : 'Not quite.'}</b> ${lf} and ${rf} are ${rep ? 'the <b>same</b>, so they <b>repel</b>' : '<b>different</b>, so they <b>attract</b>'}.<div style="margin-top:8px"><button class="btn pri" id="aNx">${a.i + 1 >= a.n ? 'See my score' : 'Next ▶'}</button></div></div>`; $('#aNx').onclick = () => { a.i++; this.stepA(); }; $('#aNx').focus(); });
+  },
+
+  /* ---- B: Material hunt ---- */
+  runB() {
+    const O = [['🔩', 'Iron nail', 'M', 'Iron is a magnetic material.'], ['📎', 'Steel paper clip', 'M', 'Steel contains iron, so it is attracted.'], ['🥫', 'Steel food can', 'M', 'The can is steel (with a thin coating), so a magnet sticks.'], ['✂️', 'Scissor blades', 'M', 'Most scissor blades are steel.'], ['🔌', 'Copper wire', 'N', 'Copper is a metal but is not attracted by a magnet.'], ['🥙', 'Aluminium foil', 'N', 'Aluminium is a metal but is not attracted.'], ['📏', 'Wooden ruler', 'N', 'Wood is not magnetic.'], ['🪮', 'Plastic comb', 'N', 'Plastic is not magnetic.'], ['🔮', 'Glass marble', 'N', 'Glass is not magnetic.'], ['🎀', 'Rubber band', 'N', 'Rubber is not magnetic.'], ['📄', 'Paper sheet', 'N', 'Paper is not magnetic.'], ['🥄', 'Stainless steel spoon', 'D', 'It depends! Some stainless steels are magnetic and some are not.'], ['🪙', 'Coin', 'D', 'It depends on the coin: some coins have a steel core and stick, others do not.']];
+    this.B = { O: shuffle(O), sel: null, ok: 0, tries: 0, placed: { M: [], N: [], D: [] } }; this.renderB();
+  },
+  renderB(msg) {
+    const B = this.B, left = B.O.filter(o => !B.placed.M.concat(B.placed.N, B.placed.D).includes(o)); const nm = { M: '🧲 Magnetic', N: '🚫 Not magnetic', D: '🤔 It depends' };
+    if (!left.length) { this.bestOf('B', B.ok, B.O.length); this.shell('🔩 Magnetic Material Hunt', `<div style="text-align:center"><div style="font-size:60px">${B.ok >= 11 ? '🏆' : '🌟'}</div><h3>All sorted! ${B.ok} of ${B.O.length} right on the first try.</h3><p>Remember: not every metal is magnetic, and some things (like stainless steel) depend on what they are made of.</p><div class="row" style="justify-content:center"><button class="btn pri" id="bAgain">🔁 Play again</button>${this.back()}</div></div>`); $('#bAgain').onclick = () => this.runB(); $('#aBack').onclick = () => this.open(); return; }
+    const b = this.shell('🔩 Magnetic Material Hunt', `<p>Tap an object, then tap the box where it belongs.</p><div class="row" id="bPool">${left.map(o => `<button class="btn ${B.sel === o ? 'on' : ''}" data-o="${B.O.indexOf(o)}" aria-pressed="${B.sel === o}">${o[0]} ${o[1]}</button>`).join('')}</div>
+      <div class="row">${['M', 'N', 'D'].map(k => `<button class="btn pri" data-bin="${k}" ${B.sel ? '' : 'disabled'}>${nm[k]}</button>`).join('')}</div><div id="bFb" aria-live="polite">${msg || ''}</div>
+      <div class="cols3">${['M', 'N', 'D'].map(k => `<div class="box"><b>${nm[k]}</b><br>${B.placed[k].map(o => o[0] + ' ' + o[1]).join('<br>') || '<small>–</small>'}</div>`).join('')}</div>`);
+    $$('[data-o]', b).forEach(x => x.onclick = () => { B.sel = B.O[+x.dataset.o]; this.renderB(); });
+    $$('[data-bin]', b).forEach(x => x.onclick = () => { const o = B.sel; if (!o) return; const k = x.dataset.bin; B.tries++; if (k === o[2]) { if (!o.miss) B.ok++; B.placed[k].push(o); B.sel = null; this.renderB(`<div class="fb ok"><b>Correct!</b> ${o[3]}</div>`); } else { o.miss = true; this.renderB(`<div class="fb no"><b>Not quite.</b> Think about what the ${o[1].toLowerCase()} is made of. Try another box!</div>`); } });
+  },
+
+  /* ---- C: Follow the field ---- */
+  runC() { this.C = { r: 0, s: 0 }; this.stepC(); },
+  stepC() {
+    const C = this.C; if (C.r >= 3) { this.bestOf('C', C.s, 3); this.shell('🌀 Follow the Field', `<div style="text-align:center"><div style="font-size:60px">${C.s === 3 ? '🏆' : '🌟'}</div><h3>You got ${C.s} of 3</h3><p>The field is strongest near the poles, and outside the magnet it points from N towards S.</p><div class="row" style="justify-content:center"><button class="btn pri" id="cAgain">🔁 Play again</button>${this.back()}</div></div>`); $('#cAgain').onclick = () => this.runC(); $('#aBack').onclick = () => this.open(); return; }
+    const flip = Math.random() < .5; C.flip = flip; const Nx = flip ? -1 : 1; /* N pole on the right (Nx=1) or left */
+    let q, opts, ans, pts = null, hint = '';
+    if (C.r === 0) { const L = shuffle(['A', 'B', 'C', 'D']); pts = { [L[0]]: [Nx * 5.2, 0.4], [L[1]]: [0, 4.4], [L[2]]: [Nx * -1 * 7.5, -5], [L[3]]: [Nx * 8.5, 5.5] }; q = 'Which point is where the magnetic field is <b>strongest</b>?'; opts = ['A', 'B', 'C', 'D']; ans = L[0]; hint = 'Look for the point closest to a pole. Field lines crowd together there.'; }
+    else if (C.r === 1) { q = 'Outside a magnet, field lines run from…'; opts = ['N pole to S pole', 'S pole to N pole', 'Left to right always']; ans = 'N pole to S pole'; hint = 'Watch the lines: they leave the red North end and enter the blue South end.'; }
+    else { const set = [[0, 4.2, 'above the middle'], [Nx * 6.5, 0, 'beyond the red North end'], [-Nx * 6.5, 0, 'beyond the blue South end']]; const p = pick(set); pts = { X: [p[0], p[1]] }; const P = [{ x: Nx * 2.6, y: 0, z: 0, q: 1 }, { x: -Nx * 2.6, y: 0, z: 0, q: -1 }]; fieldAt(p[0], 0, p[1], P, _o); const ang = Math.atan2(_o.z, _o.x), dirs = [['→', 0], ['↓', 90], ['←', 180], ['↑', -90]]; let best = dirs[0]; dirs.forEach(d => { if (Math.abs(wrapPi(d[1] * Math.PI / 180 - ang)) < Math.abs(wrapPi(best[1] * Math.PI / 180 - ang))) best = d; }); ans = best[0]; opts = dirs.map(d => d[0]); q = `A tiny compass sits at point <b>X</b> (${p[2]}). Which way does the red end of its needle point? (Ignore Earth’s field.)`; hint = 'The field points away from the red North pole and towards the blue South pole.'; }
+    const b = this.shell('🌀 Follow the Field', `<div class="lh" style="justify-content:space-between"><span class="pill">Round ${C.r + 1} of 3</span><span class="pill">⭐ ${C.s}</span></div><h3>${q}</h3><canvas id="cCv" width="640" height="340" class="lab" role="img" aria-label="Bar magnet with marked points"></canvas><div class="row">${opts.map(o => `<button class="btn pri" data-c="${esc(o)}" style="font-size:${o.length < 3 ? 26 : 16}px">${o}</button>`).join('')}<button class="btn sm" id="cHint">💡 Hint</button></div><div id="cFb" aria-live="polite"></div>`);
+    this.drawC(Nx, pts, false);
+    $('#cHint').onclick = () => { this.drawC(Nx, pts, true); $('#cFb').innerHTML = `<div class="box an"><b>Hint:</b> ${hint}</div>`; };
+    $$('[data-c]', b).forEach(x => x.onclick = () => { const ok = x.dataset.c === ans; if (ok) C.s++; $$('[data-c]', b).forEach(y => y.disabled = true); this.drawC(Nx, pts, true); $('#cFb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Correct!' : 'Not quite.'}</b> The answer is <b>${esc(ans)}</b>. ${hint}<div style="margin-top:8px"><button class="btn pri" id="cNx">${C.r >= 2 ? 'See my score' : 'Next ▶'}</button></div></div>`; $('#cNx').onclick = () => { C.r++; this.stepC(); }; $('#cNx').focus(); });
+  },
+  drawC(Nx, pts, lines) {
+    const cv = $('#cCv'); if (!cv) return; const g = cv.getContext('2d'), S = 24, cx = 320, cy = 170; g.fillStyle = '#0a1e40'; g.fillRect(0, 0, 640, 340);
+    const P = [{ x: Nx * 2.6, y: 0, z: 0, q: 1, cx: 0, cz: 0 }, { x: -Nx * 2.6, y: 0, z: 0, q: -1, cx: 0, cz: 0 }];
+    if (lines) { g.strokeStyle = 'rgba(80,220,255,.8)'; g.lineWidth = 1.6; for (let i = 0; i < 14; i++) { const a = (i / 14 - .5) * 3.4 + (Nx > 0 ? 0 : Math.PI); let x = P[0].x + Math.cos(a) * .55, z = P[0].z + Math.sin(a) * .55; g.beginPath(); g.moveTo(cx + x * S, cy + z * S); for (let k = 0; k < 160; k++) { fieldAt(x, 0, z, P, _o); const l = Math.hypot(_o.x, _o.z) || 1e-6; x += _o.x / l * .22; z += _o.z / l * .22; g.lineTo(cx + x * S, cy + z * S); if (Math.hypot(x - P[1].x, z - P[1].z) < .4 || Math.abs(x) > 12 || Math.abs(z) > 7) break; } g.stroke(); } }
+    g.fillStyle = Nx > 0 ? '#2468e8' : '#e0233a'; g.fillRect(cx - 3 * S, cy - .65 * S, 3 * S, 1.3 * S); g.fillStyle = Nx > 0 ? '#e0233a' : '#2468e8'; g.fillRect(cx, cy - .65 * S, 3 * S, 1.3 * S);
+    g.fillStyle = '#fff'; g.font = '900 28px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(Nx > 0 ? 'S' : 'N', cx - 1.5 * S, cy + 2); g.fillText(Nx > 0 ? 'N' : 'S', cx + 1.5 * S, cy + 2);
+    if (pts) for (const k in pts) { const p = pts[k]; g.fillStyle = '#ffd24a'; g.beginPath(); g.arc(cx + p[0] * S, cy + p[1] * S, 15, 0, 6.3); g.fill(); g.fillStyle = '#04203a'; g.font = '900 18px system-ui'; g.fillText(k, cx + p[0] * S, cy + p[1] * S + 1); }
+  },
+
+  /* ---- D: Build the strongest electromagnet ---- */
+  runD() { this.D = { r: 0, s: 0, n: 5 }; this.stepD(); },
+  strengthD(d) { return clamp((d.t / 60) * (d.c / 3) * (d.core ? 1 : .16) * 1.3, 0, 1.4); },
+  stepD() {
+    const D = this.D; if (D.r >= D.n) { this.bestOf('D', D.s, D.n); this.shell('⚡ Build the Strongest Electromagnet', `<div style="text-align:center"><div style="font-size:60px">${D.s >= 4 ? '🏆' : '🌟'}</div><h3>You scored ${D.s} / ${D.n}</h3><p>An iron core, more turns and more current all help. In this simplified model the iron core makes the biggest difference.</p><div class="row" style="justify-content:center"><button class="btn pri" id="dAgain">🔁 Play again</button>${this.back()}</div></div>`); $('#dAgain').onclick = () => this.runD(); $('#aBack').onclick = () => this.open(); return; }
+    let ds, ss; do { ds = ['A', 'B', 'C'].map(n => ({ n, t: pick([10, 20, 30, 40, 50, 60]), c: pick([1, 2, 3]), core: Math.random() < .6 })); ss = ds.map(d => this.strengthD(d)); } while (new Set(ss.map(s => s.toFixed(2))).size < 3 || (Math.max(...ss) - [...ss].sort((a, b) => b - a)[1]) < .08);
+    const best = ss.indexOf(Math.max(...ss)); D.ds = ds; D.ss = ss; D.best = best;
+    const lv = ['', 'Low', 'Medium', 'High'], b = this.shell('⚡ Build the Strongest Electromagnet', `<div class="lh" style="justify-content:space-between"><span class="pill">Design ${D.r + 1} of ${D.n}</span><span class="pill">⭐ ${D.s}</span></div><h3>Predict: which electromagnet will lift the most paper clips?</h3><div class="cards">${ds.map(d => `<div class="card"><h4>Design ${d.n}</h4><p>🌀 ${d.t} turns<br>🔋 ${lv[d.c]} current<br>${d.core ? '🔩 Iron core' : '⭕ No core (air)'}</p><button class="btn pri" data-d="${d.n}">Pick ${d.n}</button></div>`).join('')}</div><div id="dFb" aria-live="polite"></div>`);
+    $$('[data-d]', b).forEach(x => x.onclick = () => { const ok = x.dataset.d === ds[best].n; if (ok) D.s++; $$('[data-d]', b).forEach(y => y.disabled = true); $('#dFb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Correct!' : 'Not quite.'}</b> Design ${ds[best].n} was strongest in our model.${ds.map((d, i) => `<div class="bl"><span>Design ${d.n}</span><span>${Math.round(ss[i] * 8.5)} clips</span></div><div class="bar"><i style="width:${ss[i] / 1.1 * 100}%;background:${i === best ? '#46e08f' : '#3b82ff'}"></i></div>`).join('')}<small>Simplified model: strength depends on more than turns – current, the core and the coil design all matter.</small><div style="margin-top:8px"><button class="btn pri" id="dNx">${D.r + 1 >= D.n ? 'See my score' : 'Next ▶'}</button></div></div>`; $('#dNx').onclick = () => { D.r++; this.stepD(); }; $('#dNx').focus(); });
+  }
+};
+
+const QUIZ = [
+  { q: 'You bring the North poles of two magnets close together. What happens?', o: ['They attract', 'They repel (push apart)', 'Nothing happens', 'They lose their magnetism'], a: 1, e: 'Like poles (N and N, or S and S) repel each other.' },
+  { q: 'Which pair of poles will attract each other?', o: ['N and N', 'S and S', 'N and S', 'None of them'], a: 2, e: 'Unlike poles (N and S) attract.' },
+  { q: 'Which of these is attracted by a magnet?', o: ['A steel paper clip', 'A copper wire', 'Aluminium foil', 'A plastic ruler'], a: 0, e: 'Steel contains iron, so a magnet attracts it. Copper, aluminium and plastic are not attracted.' },
+  { q: 'Which statement is true?', o: ['A magnet attracts every metal', 'A magnet attracts only some metals, such as iron, nickel and cobalt', 'A magnet attracts all objects', 'A magnet attracts only plastic'], a: 1, e: 'Only some materials are magnetic. Many metals, like copper and aluminium, are not.' },
+  { q: 'Where is the force of a bar magnet strongest?', o: ['In the middle', 'At the poles (the ends)', 'Everywhere the same', 'Far away from it'], a: 1, e: 'The magnetic effect is strongest at the poles, where field lines crowd together.' },
+  { q: 'Outside a bar magnet, magnetic field lines run…', o: ['from S to N', 'from N to S', 'in circles that never touch the magnet', 'only from left to right'], a: 1, e: 'By convention, field lines leave the North pole and enter the South pole outside the magnet.' },
+  { q: 'What do iron filings around a magnet show?', o: ['They are the magnetic field itself', 'A pattern that reveals the shape of the field', 'That the magnet is hot', 'That the magnet is empty inside'], a: 1, e: 'The filings line up with the field and reveal its pattern. They are not the field itself.' },
+  { q: 'What happens to the magnetic force as two magnets move farther apart?', o: ['It gets stronger', 'It stays exactly the same', 'It gets weaker', 'It changes into electricity'], a: 2, e: 'The force falls quickly as the distance grows. Closer means stronger.' },
+  { q: 'Why does a compass needle point roughly north?', o: ['It is attracted by the Sun', 'It lines up with Earth’s magnetic field', 'It is pulled by gravity', 'It is pushed by the wind'], a: 1, e: 'A compass needle is a small magnet that lines up with the local magnetic field – Earth’s, when no other magnet is near.' },
+  { q: 'A strong magnet is placed close to a compass. What does the needle do?', o: ['Still points exactly north', 'Turns to follow the magnet’s field', 'Spins forever', 'Stops being magnetic'], a: 1, e: 'The compass responds to the <i>local</i> field. Near a magnet, the magnet’s field is stronger than Earth’s.' },
+  { q: 'Which change makes an electromagnet stronger?', o: ['Removing the iron core', 'Using an iron core', 'Using plastic wire', 'Opening the switch'], a: 1, e: 'An iron core strengthens an electromagnet a lot. More turns and more current also help (in a simplified model).' },
+  { q: 'You open the switch of an electromagnet holding paper clips. What happens?', o: ['Nothing – it stays strong', 'Most clips drop because the magnet switches off', 'The clips become magnets forever', 'The clips melt'], a: 1, e: 'An electromagnet is a temporary magnet. It is magnetic only while current flows.' },
+  { q: 'You cut a bar magnet in half. What do you get?', o: ['One North piece and one South piece', 'Two magnets, each with its own N and S pole', 'Two pieces that are not magnets', 'A magnet with no poles'], a: 1, e: 'Magnetic poles always come in pairs, so each piece has an N and an S pole.' },
+  { q: 'A scrapyard crane lifts old steel cars using…', o: ['A giant electromagnet', 'Glue', 'A suction cup', 'A bar of copper'], a: 0, e: 'An electromagnet can be switched on to lift steel and off to drop it.' },
+  { q: 'Are magnetic North and South poles the same as + and − electric charges?', o: ['Yes, exactly the same', 'No – they are different things, and poles always come in pairs', 'Yes, but only in iron', 'Poles do not exist'], a: 1, e: 'They behave in a similar “opposites attract” way, but magnetic poles and electric charges are different. You cannot isolate a single magnetic pole.' },
+  { q: 'Are Earth’s geographic North Pole and magnetic pole exactly the same place?', o: ['Yes, always', 'No – they are different and the magnetic pole slowly moves', 'Earth has no magnetic poles', 'Only on maps'], a: 1, e: 'The geographic pole is on Earth’s spin axis. The magnetic pole is somewhere else and wanders slowly.' },
+  { q: 'Which of these is a magnetic material?', o: ['Glass', 'Nickel', 'Rubber', 'Wood'], a: 1, e: 'Iron, nickel and cobalt (and steels) are magnetic. Glass, rubber and wood are not.' },
+  { q: 'An MRI scanner’s magnet compared with a fridge magnet is…', o: ['About the same', 'Much, much stronger', 'Much weaker', 'Not a magnet at all'], a: 1, e: 'MRI machines use very powerful magnetic fields. Metal objects must stay out of the room.' },
+  { q: 'Can a magnet pick up a paper clip through a sheet of paper?', o: ['Yes – the field passes through paper', 'No – paper blocks every magnetic force', 'Only if the paper is wet', 'Only if the paper is red'], a: 0, e: 'Magnetic fields pass through non-magnetic materials like paper, so the clip is still attracted (the force weakens with distance).' },
+  { q: 'A stainless steel spoon and a magnet: what happens?', o: ['It is always attracted', 'It is never attracted', 'It depends on the type of stainless steel', 'The spoon becomes a magnet'], a: 2, e: 'Some stainless steels are magnetic and some are not, so it depends on the type.' }
+];
+const Quiz = {
+  qs: [], i: 0, score: 0, wrong: [],
+  open() { this.start(shuffle(QUIZ.map((_, k) => k)).slice(0, 15)); },
+  start(idx) { this.qs = idx; this.i = 0; this.score = 0; this.wrong = []; Modal.open('❓ Magnets Quiz', '<div id="qHost"></div>', 'quiz'); this.render(); },
+  render() {
+    const host = $('#qHost'); if (!host) return; if (this.i >= this.qs.length) return this.result(host);
+    const q = QUIZ[this.qs[this.i]], opts = shuffle(q.o.map((t, k) => [t, k]));
+    host.innerHTML = `<div class="lh" style="justify-content:space-between"><span class="pill">Question ${this.i + 1} of ${this.qs.length}</span><span class="pill">⭐ Score ${this.score}</span></div><div class="prog" style="margin:8px 0 14px" role="progressbar" aria-valuemin="0" aria-valuemax="${this.qs.length}" aria-valuenow="${this.i}"><i style="width:${this.i / this.qs.length * 100}%"></i></div>
+      <h3 style="font-size:23px;margin:.2em 0 .6em">${q.q}</h3><div>${opts.map(o => `<button class="opt" data-k="${o[1]}">${o[0]}</button>`).join('')}</div><div id="fb" aria-live="polite"></div>`;
+    $$('.opt', host).forEach(bt => bt.onclick = () => {
+      const ok = +bt.dataset.k === q.a; $$('.opt', host).forEach(y => { y.disabled = true; if (+y.dataset.k === q.a) y.classList.add('ok'); }); if (ok) this.score++; else { bt.classList.add('no'); this.wrong.push(this.qs[this.i]); }
+      $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? ['Correct!', 'Well done!', 'Spot on!', 'Brilliant!'][this.i % 4] : ['Nice try!', 'Not quite – keep going!', 'Good effort!'][this.i % 3]}</b> ${q.e} <div style="margin-top:8px"><button class="btn pri" id="qn">${this.i + 1 >= this.qs.length ? 'See my result' : 'Next ▶'}</button></div></div>`; $('#qn').onclick = () => { this.i++; this.render(); }; $('#qn').focus();
+    });
+  },
+  result(host) {
+    const n = this.qs.length, pct = this.score / n, best = Math.max(store.get('best', 0), this.score); store.set('best', best);
+    const msg = pct >= .9 ? ['🏆', 'Magnet Master!'] : pct >= .7 ? ['🌟', 'Great work, Magnet Scientist!'] : pct >= .45 ? ['🧲', 'Good job – you are getting there!'] : ['🌱', 'A good start – every scientist learns by trying. Try again!'];
+    host.innerHTML = `<div style="text-align:center"><div style="font-size:70px">${msg[0]}</div><h3 style="font-size:26px;margin:.1em 0">${msg[1]}</h3><div class="big">${this.score} / ${n}</div><p>Best score on this device: <b>${best}</b></p>
+      <div class="prog" style="height:12px"><i style="width:${pct * 100}%"></i></div>
+      ${this.wrong.length ? `<details class="qa" style="text-align:left"><summary>Review the ones to remember (${this.wrong.length})</summary>${this.wrong.map(k => `<div class="box"><b>${QUIZ[k].q}</b><br>✔ ${QUIZ[k].o[QUIZ[k].a]}<br><small>${QUIZ[k].e}</small></div>`).join('')}</details>` : '<p>Perfect – no mistakes!</p>'}
+      <div class="row" style="justify-content:center"><button class="btn pri" id="qRetry">🔁 Retry same questions</button><button class="btn" id="qAgain">🎲 Play again (new mix)</button><button class="btn" id="qHome">🧲 Back to the lab</button></div></div>`;
+    $('#qRetry').onclick = () => this.start(this.qs.slice()); $('#qAgain').onclick = () => this.open(); $('#qHome').onclick = () => { Modal.close(); UI.go('lab'); };
+  }
+};
+const GLOSS = [
+  ['Magnet', 'An object that attracts magnetic materials and has a North and a South pole.'], ['Pole', 'The end of a magnet where the magnetic effect is strongest. Every magnet has a North (N) pole and a South (S) pole.'], ['Attract', 'To pull together. Unlike poles (N and S) attract.'], ['Repel', 'To push apart. Like poles (N and N, or S and S) repel.'],
+  ['Magnetic field', 'The invisible region around a magnet where it can push or pull on other magnets and magnetic materials.'], ['Field lines', 'A drawing that shows the shape and direction of a magnetic field. Outside a magnet they run from N to S. They are a model, not real threads.'],
+  ['Magnetic material', 'A material a magnet attracts, such as iron, steel, nickel and cobalt.'], ['Non-magnetic material', 'A material a magnet does not attract, such as wood, plastic, glass, copper and aluminium.'],
+  ['Iron filings', 'Tiny pieces of iron. They line up with a magnetic field and show its pattern.'], ['Compass', 'A tiny magnet on a pivot that lines up with the local magnetic field. Away from magnets, it points roughly north.'],
+  ['Geographic pole', 'The place where Earth’s spin axis meets the surface. It is not the same place as the magnetic pole.'], ['Magnetic pole (Earth)', 'A place where Earth’s magnetic field points straight down or up. It moves slowly over the years.'],
+  ['Electromagnet', 'A magnet made by passing an electric current through a coil of wire, often around an iron core. It can be switched on and off.'], ['Coil', 'Wire wound into many loops. A current in a coil makes a magnetic field.'], ['Core', 'A piece of iron inside a coil that makes the electromagnet much stronger.'],
+  ['Temporary magnet', 'Something that is a magnet only for a short time, like an electromagnet that works only while current flows.'], ['Permanent magnet', 'A magnet that keeps its magnetism, such as a fridge magnet or a bar magnet.'], ['Current', 'A flow of electric charge around a circuit.'], ['Magnetise', 'To make a magnetic material into a magnet.'], ['Strength', 'How strong the push or pull of a magnet is. It is greatest near the poles and falls with distance.']
+];
+const Glossary = {
+  open() {
+    const b = Modal.open('📖 Glossary', `<div class="ctl"><label for="gq">Search the glossary</label><input id="gq" type="search" placeholder="Type a word…" style="width:100%;padding:11px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.1);color:#fff;font-size:16px"></div><div id="glList" class="cards"></div>`, 'gloss');
+    const draw = q => { $('#glList').innerHTML = GLOSS.filter(g => (g[0] + ' ' + g[1]).toLowerCase().includes(q.toLowerCase())).map(g => `<div class="card"><h4>${g[0]}</h4><p>${g[1]}</p></div>`).join('') || '<p>No matching words.</p>'; };
+    draw(''); $('#gq').oninput = e => draw(e.target.value);
+  }
+};
+
+/* =====================================================================
+   BOOT, MAIN LOOP, CONTROLS
+   ===================================================================== */
+function togglePresent(on) {
+  W.present = on === undefined ? !W.present : on; document.body.classList.toggle('present', W.present); const de = document.documentElement;
+  if (W.present) { W.paused = false; UI.syncPause(); $('#settings').classList.remove('open'); try { de.requestFullscreen && de.requestFullscreen().catch(() => { }); } catch (e) { } toast('Presentation mode: bigger text for the class. Press Esc to exit.'); }
+  else { try { document.fullscreenElement && document.exitFullscreen().catch(() => { }); } catch (e) { } }
+  applyViewOffset();
+}
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && W.present) { W.present = false; document.body.classList.remove('present'); applyViewOffset(); } });
+function resetCamera() { if (CAM.preset) { camGo(CAM.preset); CAM.auto = W.mode === 'title'; } }
+function tick() {
+  requestAnimationFrame(tick);
+  const raw = Math.min(clock.getDelta(), .05), dt = W.paused ? 0 : raw * W.speed;
+  if (document.hidden || W.modalOpen) return;
+  try { T += dt; Stage.update(dt, raw); camUpdate(raw); updateLabels(); bgPts.rotation.y += raw * .01; renderer.render(scene, camera); }
+  catch (e) { if (!tick.err) { tick.err = 1; console.error(e); toast('Something went wrong with the 3D view. Try reloading the page.', null, null, 7000); } }
+  if (!tick.first) { tick.first = 1; setTimeout(() => $('#loader').classList.add('hide'), 250); }
+}
+function boot() {
+  const lowDev = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3;
+  W.gfx = store.get('gfx', lowDev ? 'low' : 'high'); UI.panel = $('#panel');
+  $('#nav').innerHTML = NAV.map(n => `<button class="nb" data-k="${n[0]}" aria-label="${n[2]}"><span class="i" aria-hidden="true">${n[1]}</span>${n[2]}</button>`).join('');
+  $$('.nb').forEach(b => b.onclick = () => UI.go(b.dataset.k));
+  try { initWorld(); initStages(); } catch (e) { console.error(e); NO3D.v = true; document.body.classList.add('no3d'); $('#loader').classList.add('hide'); toast('3D graphics are not available on this device. Activities, the quiz and the glossary still work.', null, null, 8000); }
+  PWA.init();
+  $('#startBtn').onclick = () => UI.go('lab'); $('#backBtn').onclick = () => UI.go('title');
+  $('#pauseBtn').onclick = () => { W.paused = !W.paused; UI.syncPause(); }; $('#resetCam').onclick = resetCamera;
+  $('#zoomIn').onclick = () => zoomBy(.8); $('#zoomOut').onclick = () => zoomBy(1.25);
+  $('#lblBtn').onclick = e => { W.labels = !W.labels; e.currentTarget.classList.toggle('on', !W.labels); toast(W.labels ? 'Labels shown' : 'Labels hidden', null, null, 1400); };
+  $('#presBtn').onclick = () => togglePresent(); $('#exitP').onclick = () => togglePresent(false); $('#setBtn').onclick = () => $('#settings').classList.toggle('open');
+  $('#spd').oninput = e => { W.speed = +e.target.value; $('#spdv').textContent = W.speed.toFixed(1) + '×'; };
+  $$('#gfxSeg button').forEach(b => { b.classList.toggle('on', b.dataset.g === W.gfx); b.onclick = () => { $$('#gfxSeg button').forEach(x => x.classList.toggle('on', x === b)); W.gfx = b.dataset.g; store.set('gfx', W.gfx); resize(); toast(W.gfx === 'low' ? 'Reduced graphics on: faster on older devices. Restart a stage to apply fully.' : 'High graphics on.', null, null, 2200); }; });
+  document.addEventListener('pointerdown', e => { const s = $('#settings'); if (s.classList.contains('open') && !s.contains(e.target) && e.target.id !== 'setBtn') s.classList.remove('open'); });
+  document.addEventListener('keydown', e => {
+    const tg = e.target.tagName; if (tg === 'INPUT' || tg === 'SELECT' || tg === 'TEXTAREA' || W.modalOpen) return;
+    if (e.key === ' ' && tg !== 'BUTTON') { e.preventDefault(); $('#pauseBtn').click(); }
+    if (e.key === 'q' || e.key === 'Q') rotateSel(-Math.PI / 4); if (e.key === 'e' || e.key === 'E') rotateSel(Math.PI / 4);
+  });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && clock) clock.getDelta(); });
+  UI.syncPause(); $('#top').style.visibility = 'hidden'; document.body.classList.add('is-title');
+  if (!NO3D.v) { UI.go('title'); tick(); } else { $('#title').classList.remove('gone'); }
+}
+window.addEventListener('error', e => { if (e && e.message && !/ResizeObserver/.test(e.message)) console.error('App error:', e.message); });
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+
+
+</script>
+</body>
+</html>
